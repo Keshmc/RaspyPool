@@ -1,77 +1,78 @@
+# imports
 from tkinter import *
 
-# Main Root
-root = Tk()
-root.title("Raspy Pool IDPA")
-root.geometry("800x480")
-
-# Parameter Buttons
-width = 20
+# Parameter für Buttons
+# Vorlage Button(root, text="", command=, width=width, height=height, justify=justify, padx=padx, pady=pady, font=font, bg=str(Color))
+BgColor = "#bfbeba"
+Color = "#6e6d68"
+ColorActive = "#ffd814"
+font = "Arial"
+height = 1
+width = 10
+justify = CENTER
 padx = 5
 pady = 5
-widht = 20
-height = 1
-justify = CENTER
-Color = str("#70706c")
-ColorActive = str("#e8c010")
 
-# Frame Tastenfeld links
-FeldLinks = LabelFrame(root, padx=5, pady=5)
-FeldLinks.grid(row=0, column=5)
+# Grundbild
+root = Tk()
+root.title("Raspy Pool")
+root.geometry("800x480")
+root.configure(bg=str(BgColor))
 
-# Betriebsarten
-ModeHand = StringVar(root)
-ModeHand.set("ModeHand")
-Mode = StringVar(root)
+# Tastenfeld rechts
+FeldRechts = LabelFrame(width=105, height=400, bg=str(BgColor))
+FeldRechts.grid(row=0, column=5, sticky=E)
+FeldRechts.grid_propagate(0)
 
+# Tastenfeld unten
+FeldUnten = LabelFrame(width=800, height=80, bg=str(BgColor))
+FeldUnten.grid(row=5, column=0)
 
-# FlipFlops für Mode Tasten
-def toggleHand(tog=[0]):
-    tog[0] = not tog[0]
-    if tog[0]:
-        Mode.set("ModeHand")
-
-    else:
-        pass
+# Commands
+def Auto():
+    pass
 
 
-# def toggleAuto(tog=[0]):
-#     global Mode
-#     tog[0] = not tog[0]
-#     if tog[0]:
-#         Mode = ModeAuto
-#     else:
-#         pass
-#
-#
-# def toggleService(tog=[0]):
-#     global Mode
-#     tog[0] = not tog[0]
-#     if tog[0]:
-#         Mode = ModeService
-#     else:
-#         pass
+def Hand():
+    pass
 
 
-# Betriebsarten
-# Betriebsart Hand
-if Mode.get() == "ModeHand":
-    print("Juhuuuuu")
+def Service():
+    pass
 
-bgHand = Color
-bgAuto = Color
-bgService = Color
 
-BtnHand = Button(FeldLinks, text="Hand", padx=padx, pady=5, width=widht, height=height, justify=str(justify), bg=bgHand,
-                 command=toggleHand)
-BtnAuto = Button(FeldLinks, text="Auto", padx=padx, pady=5, width=widht, height=height, justify=str(justify), bg=bgAuto)
-BtnService = Button(FeldLinks, text="Service", padx=padx, pady=5, width=widht, height=height, justify=str(justify),
-                    bg=bgService)
+def Start():
+    pass
 
-# Verschiebe die Buttons ins Tastenfeld links
-BtnAuto.grid(row=0, column=0)
-BtnHand.grid(row=1, column=0)
-BtnService.grid(row=2, column=0)
 
-# Main Loop
+def Stopp():
+    pass
+
+
+# Tastenleiste rechts
+# Definiere Buttons
+BtnAuto = Button(FeldRechts, text="Auto", command=Auto, width=width, height=height, justify=justify, font=font,
+                 bg=str(Color))
+
+BtnHand = Button(FeldRechts, text="Hand", command=Hand, width=width, height=height, justify=justify, font=font,
+                 bg=str(Color))
+
+BtnService = Button(FeldRechts, text="Service", command=Service, width=width, height=height, justify=justify, font=font,
+                    bg=str(Color))
+
+BtnStart = Button(FeldRechts, text="Start", command=Start, width=width, height=height, justify=justify, font=font,
+                  bg=str(Color))
+
+BtnStopp = Button(FeldRechts, text="Stopp", command=Stopp, width=width, height=height, justify=justify, font=font,
+                  bg=str(Color))
+
+# Ordne Buttons ins Tastenfeld rechts
+BtnAuto.grid(row=0, column=0, pady=5)
+BtnHand.grid(row=1, column=0, pady=5)
+BtnService.grid(row=2, column=0, pady=5)
+BtnStart.grid(row=3, column=0, pady=5)
+BtnStopp.grid(row=4, column=0, pady=5)
+
+
+# Mainloop
 root.mainloop()
