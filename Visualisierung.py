@@ -2,7 +2,6 @@
 from tkinter import *
 
 # Parameter für Buttons
-# Vorlage Button(root, text="", command=, width=width, height=height, justify=justify, padx=padx, pady=pady, font=font, bg=str(Color))
 BgColor = "#fffefa"
 Color = "#6e6d68"
 ColorActive = "#ffd814"
@@ -33,18 +32,43 @@ FeldUnten = LabelFrame(width=800, height=80, bg=str(BgColor))
 FeldUnten.grid(row=5, column=0, columnspan=6, sticky=W + E)
 FeldUnten.grid_propagate(0)
 
+# Variabeln
+Mode = StringVar(root)
+
 
 # Commands
 # Tastenfeld rechts
 def Auto():
-    pass
+    if BtnAuto.config("bg")[-1] == str(Color):
+        BtnAuto.config(bg=str(ColorActive))
+
+        BtnService.config(bg=str(Color))
+        BtnHand.config(bg=str(Color))
+
+    else:
+        BtnAuto.config(bg=str(Color))
 
 
 def Hand():
-    pass
+    if BtnHand.config("bg")[-1] == str(Color):
+        BtnHand.config(bg=str(ColorActive))
+
+        BtnAuto.config(bg=str(Color))
+        BtnService.config(bg=str(Color))
+
+    else:
+        BtnHand.config(bg=str(Color))
 
 
 def Service():
+    if BtnService.config("bg")[-1] == str(Color):
+        BtnService.config(bg=str(ColorActive))
+
+        BtnAuto.config(bg=str(Color))
+        BtnHand.config(bg=str(Color))
+
+    else:
+        BtnService.config(bg=str(Color))
     pass
 
 
@@ -62,11 +86,11 @@ def Home():
     PicHome.grid(row=1, column=0, rowspan=4, columnspan=4)
     PicHome.grid_propagate(0)
 
+
 def Pump():
     PicPump = LabelFrame(bg=str("#84ab8d"), width=(800 - 105), height=400)
     PicPump.grid(row=1, column=0, rowspan=4, columnspan=4)
     PicPump.grid_propagate(0)
-
 
 
 def Filter():
@@ -103,7 +127,7 @@ BtnStart = Button(FeldRechts, text="Start", command=Start, width=width, height=h
                   bg=str(Color))
 
 BtnStopp = Button(FeldRechts, text="Stopp", command=Stopp, width=width, height=height, justify=justify, font=font,
-                  bg=str(Color))
+                  bg=Color)
 
 # Ordne Buttons ins Tastenfeld rechts
 BtnAuto.grid(row=0, column=0, pady=5)
@@ -125,15 +149,15 @@ BtnHeat = Button(FeldUnten, text="Heizung", command=Heat, width=width, height=he
                  bg=str(Color))
 
 BtnParameters = Button(FeldUnten, text="Parameter", command=Parameter, width=width, height=height, justify=justify,
-                       font=font,
+                       font=str(font),
                        bg=str(Color))
 
 # Ordne Buttons ins Tastenfeld unten
 BtnHome.grid(row=0, column=0, padx=10, pady=10)
-BtnPump.grid(row=0, column=0, padx=10, pady=10)
-BtnFilter.grid(row=0, column=1, padx=10, pady=10)
-BtnHeat.grid(row=0, column=2, padx=10, pady=10)
-BtnParameters.grid(row=0, column=3, padx=10, pady=10)
+BtnPump.grid(row=0, column=1, padx=10, pady=10)
+BtnFilter.grid(row=0, column=2, padx=10, pady=10)
+BtnHeat.grid(row=0, column=3, padx=10, pady=10)
+BtnParameters.grid(row=0, column=4, padx=10, pady=10)
 
 # Mainloop
 root.mainloop()
