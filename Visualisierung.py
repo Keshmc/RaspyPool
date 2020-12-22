@@ -5,6 +5,8 @@ from tkinter import *
 BgColor = "#fffefa"
 Color = "#6e6d68"
 ColorActive = "#ffd814"
+ColorStart = "#2cf23f"
+ColorStopp = "#eb3528"
 font = "Arial"
 height = 1
 width = 10
@@ -40,10 +42,19 @@ Mode = StringVar(root)
 # Tastenfeld rechts
 def Auto():
     if BtnAuto.config("bg")[-1] == str(Color):
+        # setze Color für Buttons
         BtnAuto.config(bg=str(ColorActive))
 
         BtnService.config(bg=str(Color))
         BtnHand.config(bg=str(Color))
+
+        # setzte Modus
+        Mode.set("Auto")
+
+        # vergleiche Modus
+        while Mode.get() == "Auto":
+            BtnStart.config(bg=)
+            print("Auto aktiv")
 
     else:
         BtnAuto.config(bg=str(Color))
@@ -51,6 +62,7 @@ def Auto():
 
 def Hand():
     if BtnHand.config("bg")[-1] == str(Color):
+        # setze Color für Buttons
         BtnHand.config(bg=str(ColorActive))
 
         BtnAuto.config(bg=str(Color))
@@ -62,6 +74,7 @@ def Hand():
 
 def Service():
     if BtnService.config("bg")[-1] == str(Color):
+        # setze Color für Buttons
         BtnService.config(bg=str(ColorActive))
 
         BtnAuto.config(bg=str(Color))
@@ -73,6 +86,7 @@ def Service():
 
 
 def Start():
+
     pass
 
 

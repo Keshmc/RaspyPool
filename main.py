@@ -14,7 +14,8 @@ def Hand():
         print("Juhhhuuuu")
     pass
 
-
+def Test():
+    print("hi")
 
 
 btn = Button(root, text="Test", command=Hand).pack()
