@@ -24,3 +24,5 @@ btn = Button(root, text="Test", command=Hand).pack()
 
 
 root.mainloop()
+hallooooooo
+haloooooo
