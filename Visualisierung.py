@@ -1,6 +1,7 @@
 # imports
 from tkinter import *
 from time import sleep
+from threading import Timer
 
 # Parameter für Buttons
 BgColor = "#fffefa"
@@ -39,8 +40,19 @@ FeldUnten.grid_propagate(0)
 Mode = StringVar(root)
 
 
+# Main loop
+
+
+
 # Commands
 # Tastenfeld rechts
+def blink():
+    root.after(500, BtnStart.configure(bg=str(ColorStart)))
+    root.update()
+    root.after(500, BtnStart.configure(bg=str(Color)))
+    root.update()
+    root.after(500, blink)
+
 def Auto():
     if BtnAuto.config("bg")[-1] == str(Color):
         # setze Color für Buttons
@@ -49,18 +61,18 @@ def Auto():
         BtnService.config(bg=str(Color))
         BtnHand.config(bg=str(Color))
 
+        BtnStart.flash()
         # setzte Modus
         Mode.set("Auto")
 
-        # vergleiche Modus
-        while Mode.get() == "Auto":
-            BtnStart.config(bg=Color)
-            sleep(1)
-            BtnStart.config(bg=ColorStart)
-            print("Auto aktiv")
+
 
     else:
         BtnAuto.config(bg=str(Color))
+
+
+
+
 
 
 def Hand():
@@ -70,6 +82,9 @@ def Hand():
 
         BtnAuto.config(bg=str(Color))
         BtnService.config(bg=str(Color))
+
+        # setzte Modus
+        Mode.set("Hand")
 
     else:
         BtnHand.config(bg=str(Color))
@@ -83,13 +98,15 @@ def Service():
         BtnAuto.config(bg=str(Color))
         BtnHand.config(bg=str(Color))
 
+        # setzte Modus
+        Mode.set("Service")
+
     else:
         BtnService.config(bg=str(Color))
     pass
 
 
 def Start():
-
     pass
 
 
@@ -176,5 +193,7 @@ BtnFilter.grid(row=0, column=2, padx=10, pady=10)
 BtnHeat.grid(row=0, column=3, padx=10, pady=10)
 BtnParameters.grid(row=0, column=4, padx=10, pady=10)
 
+
 # Mainloop
+root.after(1000, blink)
 root.mainloop()
