@@ -14,5 +14,3 @@ while Mode.get == "Auto":
 
 
 root.mainloop()
-hallooooooo
-haloooooo
