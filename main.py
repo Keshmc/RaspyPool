@@ -4,21 +4,11 @@ from tkinter import *
 root = Tk()
 root.geometry("800x480")
 
-mode = StringVar()
+Mode = StringVar()
+
+while Mode.get == "Auto":
 
 
-
-def Hand():
-    mode.set("hand")
-    while "hand" in mode.get():
-        print("Juhhhuuuu")
-    pass
-
-def Test():
-    print("hi")
-
-
-btn = Button(root, text="Test", command=Hand).pack()
 
 
 
