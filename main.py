@@ -7,7 +7,7 @@ root.geometry("800x480")
 Mode = StringVar()
 
 while Mode.get == "Auto":
-
+    pass
 
 
 

@@ -1,5 +1,6 @@
 # imports
 from tkinter import *
+from time import sleep
 
 # Parameter für Buttons
 BgColor = "#fffefa"
@@ -53,7 +54,9 @@ def Auto():
 
         # vergleiche Modus
         while Mode.get() == "Auto":
-            BtnStart.config(bg=)
+            BtnStart.config(bg=Color)
+            sleep(1)
+            BtnStart.config(bg=ColorStart)
             print("Auto aktiv")
 
     else:
