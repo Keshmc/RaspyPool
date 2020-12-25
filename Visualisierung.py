@@ -1,7 +1,5 @@
 # imports
 from tkinter import *
-from time import sleep
-from threading import Timer
 
 # Parameter für Buttons
 BgColor = "#fffefa"
@@ -37,15 +35,12 @@ FeldUnten.grid(row=5, column=0, columnspan=6, sticky=W + E)
 FeldUnten.grid_propagate(0)
 
 # Variabeln
-Mode = StringVar(root)
+StatFilter = IntVar(root)
+StatPump = IntVar(root)
+StatHeat = IntVar(root)
+Mode = StringVar(root).set("platzhalter")
 
 
-# Main loop
-
-
-
-# Commands
-# Tastenfeld rechts
 def blink():
     root.after(500, BtnStart.configure(bg=str(ColorStart)))
     root.update()
@@ -53,65 +48,23 @@ def blink():
     root.update()
     root.after(500, blink)
 
-def Auto():
-    if BtnAuto.config("bg")[-1] == str(Color):
-        # setze Color für Buttons
-        BtnAuto.config(bg=str(ColorActive))
 
-        BtnService.config(bg=str(Color))
-        BtnHand.config(bg=str(Color))
-
-        BtnStart.flash()
-        # setzte Modus
-        Mode.set("Auto")
-
-
-
+def start():
+    global hmStart
+    if BtnStart.config("bg")[-1] == str(Color):
+        hmStart = True
     else:
-        BtnAuto.config(bg=str(Color))
+        BtnStart.config(bg=str(Color))
+        hmStart = False
 
 
-
-
-
-
-def Hand():
-    if BtnHand.config("bg")[-1] == str(Color):
-        # setze Color für Buttons
-        BtnHand.config(bg=str(ColorActive))
-
-        BtnAuto.config(bg=str(Color))
-        BtnService.config(bg=str(Color))
-
-        # setzte Modus
-        Mode.set("Hand")
-
+def stopp():
+    global hmStopp
+    if BtnStopp.config("bg")[-1] == str(Color):
+        hmStopp = True
     else:
-        BtnHand.config(bg=str(Color))
-
-
-def Service():
-    if BtnService.config("bg")[-1] == str(Color):
-        # setze Color für Buttons
-        BtnService.config(bg=str(ColorActive))
-
-        BtnAuto.config(bg=str(Color))
-        BtnHand.config(bg=str(Color))
-
-        # setzte Modus
-        Mode.set("Service")
-
-    else:
-        BtnService.config(bg=str(Color))
-    pass
-
-
-def Start():
-    pass
-
-
-def Stopp():
-    pass
+        BtnStart.config(bg=str(Color))
+        hmStopp = False
 
 
 # Tastenfeld unten
@@ -138,12 +91,66 @@ def Heat():
     PicHeat.grid(row=1, column=0, rowspan=4, columnspan=4)
     PicHeat.grid_propagate(0)
 
+"==========================================================================================================="
+"Parameterfeld"
+# Label für PicParameter
+PicParameter = LabelFrame(bg=str("#427bf5"), width=(800 - 105), height=400)
+PicParameter.grid_propagate(0)
+
 
 def Parameter():
+    global PicParameter
     # Bild Parameter
-    PicParameter = LabelFrame(bg=str("#427bf5"), width=(800 - 105), height=400)
     PicParameter.grid(row=1, column=0, rowspan=4, columnspan=4)
-    PicParameter.grid_propagate(0)
+
+
+# Labels Eingabefelder
+TxtIst = Label(PicParameter, text="Istwert", width=30)
+TxtSoll = Label(PicParameter, text="Sollwert", width=30)
+TxtInterval = Label(PicParameter, text="Interval: ", width=30, anchor= W)
+TxtVerzFilter = Label(PicParameter, text="Einschaltverzögerung Filter: ", width=30, anchor= W)
+TxtDauer = Label(PicParameter, text="Einschaltdauer: ", width=30, anchor= W)
+
+# Eingabe Felder
+tsollInterval = Entry(PicParameter, width=35)
+tverzFilter = Entry(PicParameter, width=35)
+tsollDauer = Entry(PicParameter, width=35)
+
+# Labels Istwert
+tistInterval = Label(PicParameter, width=30)
+tistverzFilter = Label(PicParameter, width=30)
+tistDauer = Label(PicParameter, width=30)
+
+# Packe Labels
+tistInterval.grid(row=1, column=2)
+tistverzFilter.grid(row=2, column=2)
+tistDauer.grid(row=3, column=2)
+# packe Labels ins Parameterfenster
+TxtIst.grid(row=0, column=1, padx= 5, pady=5)
+TxtSoll.grid(row=0, column=2, padx=5, pady=5)
+
+TxtInterval.grid(row=1, column=0, padx=5, pady=10)
+TxtVerzFilter.grid(row=2, column=0, padx=5, pady=10)
+TxtDauer.grid(row=3, column=0, padx=5, pady=10)
+
+# packe Eingabefelder ins Paramteterfenster
+tsollInterval.grid(row=1, column=1)
+tverzFilter.grid(row=2, column=1)
+tsollDauer.grid(row=3, column=1)
+
+
+
+
+def Auto():
+    pass
+
+
+def Hand():
+    pass
+
+
+def Service():
+    pass
 
 
 # Tastenleiste rechts
@@ -157,10 +164,10 @@ BtnHand = Button(FeldRechts, text="Hand", command=Hand, width=width, height=heig
 BtnService = Button(FeldRechts, text="Service", command=Service, width=width, height=height, justify=justify, font=font,
                     bg=str(Color))
 
-BtnStart = Button(FeldRechts, text="Start", command=Start, width=width, height=height, justify=justify, font=font,
+BtnStart = Button(FeldRechts, text="Start", command=start, width=width, height=height, justify=justify, font=font,
                   bg=str(Color))
 
-BtnStopp = Button(FeldRechts, text="Stopp", command=Stopp, width=width, height=height, justify=justify, font=font,
+BtnStopp = Button(FeldRechts, text="Stopp", command=stopp, width=width, height=height, justify=justify, font=font,
                   bg=Color)
 
 # Ordne Buttons ins Tastenfeld rechts
@@ -192,7 +199,6 @@ BtnPump.grid(row=0, column=1, padx=10, pady=10)
 BtnFilter.grid(row=0, column=2, padx=10, pady=10)
 BtnHeat.grid(row=0, column=3, padx=10, pady=10)
 BtnParameters.grid(row=0, column=4, padx=10, pady=10)
-
 
 # Mainloop
 root.after(1000, blink)
