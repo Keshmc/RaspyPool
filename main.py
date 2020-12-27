@@ -2,9 +2,12 @@
 from tkinter import *
 
 import RPi.GPIO as GPIO
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.IN)
 GPIO.setup(18, GPIO.OUT)
+GPIO.setup(23, GPIO.OUT)
+GPIO.setup(24, GPIO.OUT)
 
 
 root = Tk()
