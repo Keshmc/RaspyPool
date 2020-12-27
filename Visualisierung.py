@@ -1,5 +1,13 @@
 # imports
 from tkinter import *
+from PIL import ImageTk, Image
+from enum import Enum
+
+class Mode(Enum):
+    Auto = "auto"
+    Hand = "hand"
+    Service = "service"
+
 
 # Parameter für Buttons
 BgColor = "#fffefa"
@@ -38,15 +46,17 @@ FeldUnten.grid_propagate(0)
 StatFilter = IntVar(root)
 StatPump = IntVar(root)
 StatHeat = IntVar(root)
-Mode = StringVar(root).set("platzhalter")
+# Mode = StringVar(root).set("platzhalter")
+CurrentMode = Mode.Auto
 
 
-def blink():
-    root.after(500, BtnStart.configure(bg=str(ColorStart)))
-    root.update()
-    root.after(500, BtnStart.configure(bg=str(Color)))
-    root.update()
-    root.after(500, blink)
+
+# def blink():
+#     root.after(500, BtnStart.configure(bg=str(ColorStart)))
+#     root.update()
+#     root.after(500, BtnStart.configure(bg=str(Color)))
+#     root.update()
+#     root.after(500, blink)
 
 
 def start():
@@ -68,88 +78,105 @@ def stopp():
 
 
 # Tastenfeld unten
+img = ImageTk.PhotoImage(Image.open("HomeBild.png"))
+PicHome = Label(root, image=img, width=(800 - 105), height=400)
+PicHome.grid(row=1, column=0, rowspan=4, columnspan=4)
+PicHome.grid_propagate(0)
+
 def Home():
-    PicHome = LabelFrame(bg=str(BgColor), width=(800 - 105), height=400)
+    global img
+    global PicHome
+
+
+    PicHome.grid_forget()
+    PicHome = Label(root, image=img, width=(800 - 105), height=400)
     PicHome.grid(row=1, column=0, rowspan=4, columnspan=4)
     PicHome.grid_propagate(0)
 
-
 def Pump():
-    PicPump = LabelFrame(bg=str("#84ab8d"), width=(800 - 105), height=400)
-    PicPump.grid(row=1, column=0, rowspan=4, columnspan=4)
-    PicPump.grid_propagate(0)
+    # PicPump = LabelFrame(bg=str("#84ab8d"), width=(800 - 105), height=400)
+    # PicPump.grid(row=1, column=0, rowspan=4, columnspan=4)
+    # PicPump.grid_propagate(0)
+    pass
 
 
 def Filter():
-    PicFilter = LabelFrame(bg=str("#cb34d9"), width=(800 - 105), height=400)
-    PicFilter.grid(row=1, column=0, rowspan=4, columnspan=4)
-    PicFilter.grid_propagate(0)
+    # PicFilter = LabelFrame(bg=str("#cb34d9"), width=(800 - 105), height=400)
+    # PicFilter.grid(row=1, column=0, rowspan=4, columnspan=4)
+    # PicFilter.grid_propagate(0)
+    pass
 
 
 def Heat():
-    PicHeat = LabelFrame(bg=str("#d95d34"), width=(800 - 105), height=400)
-    PicHeat.grid(row=1, column=0, rowspan=4, columnspan=4)
-    PicHeat.grid_propagate(0)
+    # PicHeat = LabelFrame(bg=str("#d95d34"), width=(800 - 105), height=400)
+    # PicHeat.grid(row=1, column=0, rowspan=4, columnspan=4)
+    # PicHeat.grid_propagate(0)
+    pass
 
 "==========================================================================================================="
 "Parameterfeld"
-# Label für PicParameter
-PicParameter = LabelFrame(bg=str("#427bf5"), width=(800 - 105), height=400)
-PicParameter.grid_propagate(0)
+
 
 
 def Parameter():
-    global PicParameter
+    # Label für PicParameter
+    PicParameter = LabelFrame(bg=str("#427bf5"), width=(800 - 105), height=400)
+    PicParameter.grid_propagate(0)
+
     # Bild Parameter
     PicParameter.grid(row=1, column=0, rowspan=4, columnspan=4)
 
 
-# Labels Eingabefelder
-TxtIst = Label(PicParameter, text="Istwert", width=30)
-TxtSoll = Label(PicParameter, text="Sollwert", width=30)
-TxtInterval = Label(PicParameter, text="Interval: ", width=30, anchor= W)
-TxtVerzFilter = Label(PicParameter, text="Einschaltverzögerung Filter: ", width=30, anchor= W)
-TxtDauer = Label(PicParameter, text="Einschaltdauer: ", width=30, anchor= W)
+    # Labels Eingabefelder
+    TxtIst = Label(PicParameter, text="Istwert", width=30)
+    TxtSoll = Label(PicParameter, text="Sollwert", width=30)
+    TxtInterval = Label(PicParameter, text="Interval: ", width=30, anchor= W)
+    TxtVerzFilter = Label(PicParameter, text="Einschaltverzögerung Filter: ", width=30, anchor= W)
+    TxtDauer = Label(PicParameter, text="Einschaltdauer: ", width=30, anchor= W)
 
-# Eingabe Felder
-tsollInterval = Entry(PicParameter, width=35)
-tverzFilter = Entry(PicParameter, width=35)
-tsollDauer = Entry(PicParameter, width=35)
+    # Eingabe Felder
+    tsollInterval = Entry(PicParameter, width=35)
+    tverzFilter = Entry(PicParameter, width=35)
+    tsollDauer = Entry(PicParameter, width=35)
 
-# Labels Istwert
-tistInterval = Label(PicParameter, width=30)
-tistverzFilter = Label(PicParameter, width=30)
-tistDauer = Label(PicParameter, width=30)
+    # Labels Istwert
+    tistInterval = Label(PicParameter, width=30)
+    tistverzFilter = Label(PicParameter, width=30)
+    tistDauer = Label(PicParameter, width=30)
 
-# Packe Labels
-tistInterval.grid(row=1, column=2)
-tistverzFilter.grid(row=2, column=2)
-tistDauer.grid(row=3, column=2)
-# packe Labels ins Parameterfenster
-TxtIst.grid(row=0, column=1, padx= 5, pady=5)
-TxtSoll.grid(row=0, column=2, padx=5, pady=5)
+    # Packe Labels
+    tistInterval.grid(row=1, column=2)
+    tistverzFilter.grid(row=2, column=2)
+    tistDauer.grid(row=3, column=2)
+    # packe Labels ins Parameterfenster
+    TxtIst.grid(row=0, column=1, padx= 5, pady=5)
+    TxtSoll.grid(row=0, column=2, padx=5, pady=5)
 
-TxtInterval.grid(row=1, column=0, padx=5, pady=10)
-TxtVerzFilter.grid(row=2, column=0, padx=5, pady=10)
-TxtDauer.grid(row=3, column=0, padx=5, pady=10)
+    TxtInterval.grid(row=1, column=0, padx=5, pady=10)
+    TxtVerzFilter.grid(row=2, column=0, padx=5, pady=10)
+    TxtDauer.grid(row=3, column=0, padx=5, pady=10)
 
-# packe Eingabefelder ins Paramteterfenster
-tsollInterval.grid(row=1, column=1)
-tverzFilter.grid(row=2, column=1)
-tsollDauer.grid(row=3, column=1)
+    # packe Eingabefelder ins Paramteterfenster
+    tsollInterval.grid(row=1, column=1)
+    tverzFilter.grid(row=2, column=1)
+    tsollDauer.grid(row=3, column=1)
 
 
 
 
 def Auto():
+    CurrentMode = Mode.Auto
     pass
 
 
 def Hand():
+    CurrentMode = Mode.Hand
     pass
 
 
 def Service():
+    CurrentMode = Mode.Service
+
     pass
 
 
@@ -177,6 +204,8 @@ BtnService.grid(row=2, column=0, pady=5)
 BtnStart.grid(row=3, column=0, pady=5)
 BtnStopp.grid(row=4, column=0, pady=5)
 
+
+
 # Tastenfeld unten
 BtnHome = Button(FeldUnten, text="Home", command=Home, width=width, height=height, justify=justify, font=font,
                  bg=str(Color))
@@ -200,6 +229,7 @@ BtnFilter.grid(row=0, column=2, padx=10, pady=10)
 BtnHeat.grid(row=0, column=3, padx=10, pady=10)
 BtnParameters.grid(row=0, column=4, padx=10, pady=10)
 
+
 # Mainloop
-root.after(1000, blink)
+# root.after(1000, blink)
 root.mainloop()
