@@ -15,6 +15,7 @@ colBtnStop = "#f02805"
 # Parameter
 imgPath = StringVar(root)
 imgPath.set("HomeBild.png")
+
 # Parameter für Buttons
 height = 1
 width = 10
@@ -22,7 +23,6 @@ justify = CENTER
 font = "Arial"
 padx = 5
 pady = 5
-
 
 "=== Bilder / Labels ========================================================================="
 # Grundbild (Root)
@@ -49,7 +49,6 @@ imgHome = ImageTk.PhotoImage(Image.open(imgPath.get()))
 labPicHome = Label(root, image=imgHome, width=(800 - 105), height=400)
 labPicHome.grid(row=1, column=0, rowspan=4, columnspan=4)
 labPicHome.grid_propagate(0)
-
 
 "=== Variabeln =========================================================================="
 # Globale Varialbeln
@@ -115,14 +114,14 @@ def parameter():
 
     # Labels und Texte
     # Definition der Labels für Texte
-    TxtIstwert = Label(labPicHome, text="Istwert", width=15, font= font)
-    TxtSollwert = Label(labPicHome, text="Sollwert", width=15, font= font)
-    TxtInterval = Label(labPicHome, text="Interval: ", width=25, anchor=W, font= font)
-    TxtVerzFilter = Label(labPicHome, text="Einschaltverzögerung Filter: ", width=25, anchor=W, font= font)
-    TxtDauer = Label(labPicHome, text="Einschaltdauer: ", width=25, anchor=W, font= font)
+    TxtIstwert = Label(labPicHome, text="Istwert", width=15, font=font)
+    TxtSollwert = Label(labPicHome, text="Sollwert", width=15, font=font)
+    TxtInterval = Label(labPicHome, text="Interval: ", width=25, anchor=W, font=font)
+    TxtVerzFilter = Label(labPicHome, text="Einschaltverzögerung Filter: ", width=25, anchor=W, font=font)
+    TxtDauer = Label(labPicHome, text="Einschaltdauer: ", width=25, anchor=W, font=font)
 
     # Platziere die Texte
-    TxtIstwert.grid(row=0, column=1, padx= 5, pady=5)
+    TxtIstwert.grid(row=0, column=1, padx=5, pady=5)
     TxtSollwert.grid(row=0, column=2, padx=5, pady=5)
     TxtInterval.grid(row=1, column=0, padx=5, pady=10)
     TxtVerzFilter.grid(row=2, column=0, padx=5, pady=10)
@@ -130,14 +129,14 @@ def parameter():
 
     # Eingabe / Ausgabefenster
     # Definiere Sollwerte
-    tsollInterval = Entry(labPicHome, width=15, font= str(font))
-    tsollVerzFilter = Entry(labPicHome, width=15, font= str(font))
-    tsollDauer = Entry(labPicHome, width=15, font= str(font))
+    tsollInterval = Entry(labPicHome, width=15, font=str(font))
+    tsollVerzFilter = Entry(labPicHome, width=15, font=str(font))
+    tsollDauer = Entry(labPicHome, width=15, font=str(font))
 
     # Definmiere Istwerte
-    tistInterval = Label(labPicHome, width=15, font= str(font))
-    tistVerzFilter = Label(labPicHome, width=15, font= str(font))
-    tistDauer = Label(labPicHome, width=15, font= str(font))
+    tistInterval = Label(labPicHome, width=15, font=str(font))
+    tistVerzFilter = Label(labPicHome, width=15, font=str(font))
+    tistDauer = Label(labPicHome, width=15, font=str(font))
 
     # Platziere Sollwert
     tsollInterval.grid(row=1, column=1)
@@ -150,7 +149,6 @@ def parameter():
     tistDauer.grid(row=3, column=2)
 
 
-
 def pumpe(val):
     befPump.set(val)
 
@@ -161,7 +159,6 @@ def filtr(val):
 
 def heat(val):
     befHeat.set(val)
-
 
 "=== Buttons =========================================================================="
 # Buttons fürs Tastenfeld rechts
@@ -193,14 +190,19 @@ BtnSafe.grid(row=5, column=0, pady=10)
 
 # Buttons fürs Tastenfeld unten
 # Definition
-BtnHome = Button(labFeldUnten, command=home, text="Home", width=width, height=height, justify=justify, bg=str(colBtn), font=str(font))
-BtnPump = Button(labFeldUnten, text="Pumpe", width=width, height=height, justify=justify, bg=str(colBtn),
+BtnHome = Button(labFeldUnten, command=home, text="Home", width=width, height=height, justify=justify, bg=str(colBtn),
                  font=str(font))
-BtnFilter = Button(labFeldUnten, text="Filter", width=width, height=height, justify=justify, bg=str(colBtn),
+BtnPump = Button(labFeldUnten, command=pumpe(True), text="Pumpe", width=width, height=height, justify=justify,
+                 bg=str(colBtn),
+                 font=str(font))
+BtnFilter = Button(labFeldUnten, command=filtr(True), text="Filter", width=width, height=height, justify=justify,
+                   bg=str(colBtn),
                    font=str(font))
-BtnHeat = Button(labFeldUnten, text="Heizung", width=width, height=height, justify=justify, bg=str(colBtn),
+BtnHeat = Button(labFeldUnten, command=heat(True), text="Heizung", width=width, height=height, justify=justify,
+                 bg=str(colBtn),
                  font=str(font))
-BtnParameters = Button(labFeldUnten, command=parameter, text="Parameters", width=width, height=height, justify=justify, bg=str(colBtn),
+BtnParameters = Button(labFeldUnten, command=parameter, text="Parameters", width=width, height=height, justify=justify,
+                       bg=str(colBtn),
                        font=str(font))
 BtnExit = Button(labFeldUnten, command=root.quit, text="Exit", width=width, height=height, justify=justify,
                  bg=str(colBtn), font=str(font))
