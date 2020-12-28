@@ -1,7 +1,7 @@
 # Pythons IDPA Projekt Raspy Pool Main Cycle
 from tkinter import *
 
-import RPi.GPIO as GPIO
+import RPI.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.IN)
@@ -29,3 +29,24 @@ while "hand":
 
     else:
         GPIO.output(18, GPIO.HIGH)
+
+#Handbetrieb
+#alles eigenständig ein und ausschalten
+
+# Automatikbetrieb
+# alles automatisch laufen und filter soll verspätet einschalten
+
+# Servicebetrieb
+# nur pumpe
+
+# Variabeln
+Mode = StringVar(root)
+befPump = BooleanVar(root)
+befFilter = BooleanVar(root)
+befHeat = BooleanVar(root)
+
+tsollInterval = Entry()
+tsollverFilter = Entry()
+
+Mode.get() #Wert aus Variabel
+
