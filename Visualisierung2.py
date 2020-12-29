@@ -54,9 +54,7 @@ labPicHome.grid_propagate(0)
 "=== Variabeln =========================================================================="
 # Globale Varialbeln
 Mode = StringVar(root)
-befPumpHand = BooleanVar(root)
-befFilterHand = BooleanVar(root)
-befHeatHand = BooleanVar(root)
+hmStart = BooleanVar(root)
 
 # Sollwerte
 tsollInterval = Entry()
@@ -68,7 +66,42 @@ tistInterval = Label()
 tistVerzFilter = Label()
 tistDauer = Label()
 
+# Befehle
+befPumpHand = BooleanVar(root)
+befFilterHand = BooleanVar(root)
+befHeatHand = BooleanVar(root)
+befPumpAuto = BooleanVar(root)
+befFilterAuto = BooleanVar(root)
+befHeatAuto = BooleanVar(root)
+
 "=== Funktionen =========================================================================="
+
+
+def Ablauf():
+    if hmStart:
+        BtnStart.config(bg=colBtnStart)
+    else:
+        BtnStart.config(bg=colBtn)
+
+    if Mode.get() == "auto":
+        # setzte Handbefele zurück
+        befPumpHand.set(False)
+        befFilterHand.set(False)
+        befHeatHand.set(False)
+
+    if Mode.get() == "hand":
+        # setzte Autobefehle zurück
+        befPumpAuto.set(False)
+        befFilterAuto.set(False)
+        befHeatAuto.set(False)
+
+    if Mode.get() == "service":
+        # setzte Handbefele zurück
+        befPumpHand.set(False)
+        befFilterHand.set(False)
+        befHeatHand.set(False)
+
+    root.after(100, Ablauf)
 
 
 # Funktionen welche durch Buttons ausgeführt werden
@@ -78,34 +111,20 @@ def setMode(arg="dummy"):
     # Modus wird von Button über Argument mit (hand / auto oder service) beschrieben
     Mode.set(arg)
 
-    # Button des aktiven Modus wird orange dargestellt, die anderen werden zurückgesetzte
-    if Mode.get() == "auto":
-        BtnHand.config(bg=colBtn)
-        BtnAuto.config(bg=colBtnAktiv)
-        BtnService.config(bg=colBtn)
 
-    if Mode.get() == "hand":
-        BtnHand.config(bg=colBtnAktiv)
-        BtnAuto.config(bg=colBtn)
-        BtnService.config(bg=colBtn)
 
-    if Mode.get() == "service":
-        BtnHand.config(bg=colBtn)
-        BtnAuto.config(bg=colBtn)
-        BtnService.config(bg=colBtnAktiv)
+    root.update()
 
     return Mode.get()
 
 
 def start():
-    if Mode.get() == "auto":
-        pass
-    if Mode.get() == "hand":
-        pass
-    if Mode.get() == "service":
-        pass
+    hmStart.set(True)
 
-    pass
+
+def stopp():
+    hmStart.set(False)
+    setMode("dummy")
 
 
 # Tastenfeld unten
@@ -118,8 +137,6 @@ def pumpe():
         befPumpHand.set(False)
 
 
-
-
 def filtr():
     if BtnFilter.config("bg")[-1] == str(colBtn):
         BtnFilter.config(bg=str(colBtnEin))
@@ -129,8 +146,6 @@ def filtr():
         befFilterHand.set(False)
 
 
-
-
 def heat():
     if BtnHeat.config("bg")[-1] == str(colBtn):
         BtnHeat.config(bg=str(colBtnEin))
@@ -138,7 +153,6 @@ def heat():
     else:
         BtnHeat.config(bg=str(colBtn))
         befHeatHand.set(False)
-
 
 
 def home():
@@ -206,6 +220,36 @@ def parameter():
     tistVerzFilter.grid(row=2, column=2)
     tistDauer.grid(row=3, column=2)
 
+"=== Visualisierung =========================================================================="
+
+def Visualisierung(arg):
+    # Visualisierung
+    if arg == "auto":
+        # Buttons Modus
+        BtnAuto.config(bg=colBtnAktiv)
+        BtnHand.config(bg=colBtn)
+        BtnService.config(bg=colBtn)
+
+    if arg == "hand":
+        # Buttons Modus
+        BtnAuto.config(bg=colBtn)
+        BtnHand.config(bg=colBtnAktiv)
+        BtnService.config(bg=colBtn)
+
+    if arg == "service":
+        # Buttons Modus
+        BtnAuto.config(bg=colBtn)
+        BtnHand.config(bg=colBtn)
+        BtnService.config(bg=colBtnAktiv)
+
+    if arg != "auto" or "hand" or "service":
+        # Buttons Modus
+        BtnAuto.config(bg=colBtn)
+        BtnHand.config(bg=colBtn)
+        BtnService.config(bg=colBtn)
+    pass
+
+
 
 "=== Buttons =========================================================================="
 # Buttons fürs Tastenfeld rechts
@@ -219,10 +263,11 @@ BtnHand = Button(labFeldRechts, text="Hand", command=lambda: setMode("hand"), wi
 BtnService = Button(labFeldRechts, command=lambda: setMode("service"), text="Service", width=width, height=height,
                     justify=justify, bg=str(colBtn),
                     font=str(font))
-BtnStart = Button(labFeldRechts, text="Start", width=width, height=height, justify=justify,
-                  bg=str(colBtnStart),
+BtnStart = Button(labFeldRechts, command=start, text="Start", width=width, height=height, justify=justify,
+                  bg=str(colBtn),
                   font=str(font))
-BtnStopp = Button(labFeldRechts, text="Stop", width=width, height=height, justify=justify, bg=str(colBtnStop),
+BtnStopp = Button(labFeldRechts, command=stopp, text="Stop", width=width, height=height, justify=justify,
+                  bg=str(colBtn),
                   font=str(font))
 BtnSafe = Button(labFeldRechts, text="Speichern", width=width, height=height, justify=justify, bg=str(colBtn),
                  font=str(font))
@@ -265,6 +310,7 @@ BtnExit.grid(row=0, column=5, padx=(95, 0), pady=10)
 # Aufruf von Funktion
 # setzte standard Modus auf Hand
 setMode()
+
 
 # Mainloop
 root.mainloop()
