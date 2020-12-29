@@ -9,6 +9,7 @@ root = Tk()
 colBg = "#adc9c5"
 colBtn = "#7e8282"
 colBtnAktiv = "#ebae2d"
+colBtnEin = "#08c43a"
 colBtnStart = "#6ceb2d"
 colBtnStop = "#f02805"
 
@@ -53,9 +54,9 @@ labPicHome.grid_propagate(0)
 "=== Variabeln =========================================================================="
 # Globale Varialbeln
 Mode = StringVar(root)
-befPump = BooleanVar(root)
-befFilter = BooleanVar(root)
-befHeat = BooleanVar(root)
+befPumpHand = BooleanVar(root)
+befFilterHand = BooleanVar(root)
+befHeatHand = BooleanVar(root)
 
 # Sollwerte
 tsollInterval = Entry()
@@ -73,16 +74,73 @@ tistDauer = Label()
 # Funktionen welche durch Buttons ausgeführt werden
 
 # Betriebsmodus (Standard = Hand)
-def setMode(arg="hand"):
+def setMode(arg="dummy"):
+    # Modus wird von Button über Argument mit (hand / auto oder service) beschrieben
     Mode.set(arg)
+
+    # Button des aktiven Modus wird orange dargestellt, die anderen werden zurückgesetzte
+    if Mode.get() == "auto":
+        BtnHand.config(bg=colBtn)
+        BtnAuto.config(bg=colBtnAktiv)
+        BtnService.config(bg=colBtn)
+
+    if Mode.get() == "hand":
+        BtnHand.config(bg=colBtnAktiv)
+        BtnAuto.config(bg=colBtn)
+        BtnService.config(bg=colBtn)
+
+    if Mode.get() == "service":
+        BtnHand.config(bg=colBtn)
+        BtnAuto.config(bg=colBtn)
+        BtnService.config(bg=colBtnAktiv)
+
     return Mode.get()
 
 
 def start():
+    if Mode.get() == "auto":
+        pass
+    if Mode.get() == "hand":
+        pass
+    if Mode.get() == "service":
+        pass
+
     pass
 
 
 # Tastenfeld unten
+def pumpe():
+    if BtnPumpe.config("bg")[-1] == str(colBtn):
+        BtnPumpe.config(bg=str(colBtnEin))
+        befPumpHand.set(True)
+    else:
+        BtnPumpe.config(bg=str(colBtn))
+        befPumpHand.set(False)
+
+
+
+
+def filtr():
+    if BtnFilter.config("bg")[-1] == str(colBtn):
+        BtnFilter.config(bg=str(colBtnEin))
+        befFilterHand.set(True)
+    else:
+        BtnFilter.config(bg=str(colBtn))
+        befFilterHand.set(False)
+
+
+
+
+def heat():
+    if BtnHeat.config("bg")[-1] == str(colBtn):
+        BtnHeat.config(bg=str(colBtnEin))
+        befHeatHand.set(True)
+    else:
+        BtnHeat.config(bg=str(colBtn))
+        befHeatHand.set(False)
+
+
+
 def home():
     global labPicHome
     global imgHome
@@ -149,17 +207,6 @@ def parameter():
     tistDauer.grid(row=3, column=2)
 
 
-def pumpe(val):
-    befPump.set(val)
-
-
-def filtr(val):
-    befFilter.set(val)
-
-
-def heat(val):
-    befHeat.set(val)
-
 "=== Buttons =========================================================================="
 # Buttons fürs Tastenfeld rechts
 # Definition
@@ -192,13 +239,13 @@ BtnSafe.grid(row=5, column=0, pady=10)
 # Definition
 BtnHome = Button(labFeldUnten, command=home, text="Home", width=width, height=height, justify=justify, bg=str(colBtn),
                  font=str(font))
-BtnPump = Button(labFeldUnten, command=pumpe(True), text="Pumpe", width=width, height=height, justify=justify,
-                 bg=str(colBtn),
-                 font=str(font))
-BtnFilter = Button(labFeldUnten, command=filtr(True), text="Filter", width=width, height=height, justify=justify,
+BtnPumpe = Button(labFeldUnten, command=pumpe, text="Pumpe", width=width, height=height, justify=justify,
+                  bg=str(colBtn),
+                  font=str(font))
+BtnFilter = Button(labFeldUnten, command=filtr, text="Filter", width=width, height=height, justify=justify,
                    bg=str(colBtn),
                    font=str(font))
-BtnHeat = Button(labFeldUnten, command=heat(True), text="Heizung", width=width, height=height, justify=justify,
+BtnHeat = Button(labFeldUnten, command=heat, text="Heizung", width=width, height=height, justify=justify,
                  bg=str(colBtn),
                  font=str(font))
 BtnParameters = Button(labFeldUnten, command=parameter, text="Parameters", width=width, height=height, justify=justify,
@@ -209,7 +256,7 @@ BtnExit = Button(labFeldUnten, command=root.quit, text="Exit", width=width, heig
 
 # Platzierung
 BtnHome.grid(row=0, column=0, padx=10, pady=10)
-BtnPump.grid(row=0, column=1, padx=10, pady=10)
+BtnPumpe.grid(row=0, column=1, padx=10, pady=10)
 BtnFilter.grid(row=0, column=2, padx=10, pady=10)
 BtnHeat.grid(row=0, column=3, padx=10, pady=10)
 BtnParameters.grid(row=0, column=4, padx=10, pady=10)
