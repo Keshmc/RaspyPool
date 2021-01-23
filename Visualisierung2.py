@@ -1,6 +1,7 @@
 # imports
 from tkinter import *
 from PIL import ImageTk, Image
+import time
 
 "=== Initialisierung ========================================================================="
 root = Tk()
@@ -58,14 +59,21 @@ hmStart = BooleanVar(root)
 hmStart.set(True)
 
 # Sollwerte
-tsollInterval = Entry()
-tsollVerzFilter = Entry()
-tsollDauer = Entry()
+tsollInterval = Entry(root)
+tsollVerzFilter = Entry(root)
+tsollDauer = Entry(root)
+
+tInterval = str("hh:mm")
+tVerzFilter = str("min")
+tDauer = str("min")
 
 # Istwerte
 tistInterval = Label()
 tistVerzFilter = Label()
 tistDauer = Label()
+
+# Zeiten
+current = time.strftime("%H:%M")
 
 # Befehle
 befPumpHand = BooleanVar(root)
@@ -74,6 +82,8 @@ befHeatHand = BooleanVar(root)
 befPumpAuto = BooleanVar(root)
 befFilterAuto = BooleanVar(root)
 befHeatAuto = BooleanVar(root)
+befTime = BooleanVar(root)
+befTimeVerzFilter = BooleanVar(root)
 
 "=== Funktionen =========================================================================="
 
@@ -88,6 +98,43 @@ def Ablauf():
     root.after(1000, Ablauf)
 
 
+def Time():
+    global tDauer
+    global tInterval
+    global tVerzFilter
+
+
+    # wandle Zeiten in Floats zum Rechnen
+    actual = float(time.strftime("%H%M"))
+    ConvInterval = float(tInterval.replace(":", ""))
+    ConvtDauer = float(tDauer)
+    ConvFilter = float(tVerzFilter)
+
+    # Berechne Endzeit
+    if ConvtDauer > 60:
+        tEnd = ConvInterval + (ConvtDauer * 100/60)
+    else:
+        tEnd = ConvInterval + ConvtDauer
+
+    if ConvFilter > 60:
+        tFgFilter = ConvInterval + (ConvFilter * 100/60)
+    else:
+        tFgFilter = ConvInterval + ConvFilter
+
+    print("Ende =" + str(tEnd))
+    print("Filter =" + str(tFgFilter))
+
+
+    # Vergleich
+    if ConvInterval< actual < tEnd:
+        print("FgTime")
+
+    if tFgFilter < actual < tEnd:
+        print("Filter Ein")
+
+    root.after(1000, Time)
+
+
 # Funktionen welche durch Buttons ausgeführt werden
 # Betriebsmodus (Standard = Hand)
 def setMode(arg="dummy"):
@@ -96,10 +143,12 @@ def setMode(arg="dummy"):
     Visualisierung(arg)
     return Mode.get()
 
+
 # Start / Stopp Funktion, startet die LoopFuntkion Ablauf()
 def start(val):
     hmStart.set(val)
     Ablauf()
+
 
 # Tastenfeld unten
 def pumpe():
@@ -148,6 +197,9 @@ def parameter():
     global tistVerzFilter
     global tistInterval
     global tistDauer
+    global tInterval
+    global tDauer
+    global tVerzFilter
 
     # Labelfeld
     # Definition
@@ -160,8 +212,8 @@ def parameter():
 
     # Labels und Texte
     # Definition der Labels für Texte
-    TxtIstwert = Label(labPicHome, text="Istwert", width=15, font=font)
-    TxtSollwert = Label(labPicHome, text="Sollwert", width=15, font=font)
+    TxtIstwert = Label(labPicHome, text="Sollwert", width=15, font=font)
+    TxtSollwert = Label(labPicHome, text="Istwert", width=15, font=font)
     TxtInterval = Label(labPicHome, text="Interval: ", width=25, anchor=W, font=font)
     TxtVerzFilter = Label(labPicHome, text="Einschaltverzögerung Filter: ", width=25, anchor=W, font=font)
     TxtDauer = Label(labPicHome, text="Einschaltdauer: ", width=25, anchor=W, font=font)
@@ -179,20 +231,62 @@ def parameter():
     tsollVerzFilter = Entry(labPicHome, width=15, font=str(font))
     tsollDauer = Entry(labPicHome, width=15, font=str(font))
 
-    # Definmiere Istwerte
-    tistInterval = Label(labPicHome, width=15, font=str(font))
-    tistVerzFilter = Label(labPicHome, width=15, font=str(font))
-    tistDauer = Label(labPicHome, width=15, font=str(font))
+    # Definiere Istwerte
+    tistInterval = Label(labPicHome, text=" ", width=15, font=str(font))
+    tistVerzFilter = Label(labPicHome, text="Time", width=15, font=str(font))
+    tistDauer = Label(labPicHome, text="Time", width=15, font=str(font))
+
+    # Platziere Istwert
+    tistInterval.grid(row=1, column=2)
+    tistVerzFilter.grid(row=2, column=2)
+    tistDauer.grid(row=3, column=2)
 
     # Platziere Sollwert
     tsollInterval.grid(row=1, column=1)
     tsollVerzFilter.grid(row=2, column=1)
     tsollDauer.grid(row=3, column=1)
 
-    # Platziere Istwert
-    tistInterval.grid(row=1, column=2)
-    tistVerzFilter.grid(row=2, column=2)
-    tistDauer.grid(row=3, column=2)
+    # setze Sollwert
+    tsollInterval.insert(0, str(tInterval))
+    tsollDauer.insert(0, str(tDauer))
+    tsollVerzFilter.insert(0, str(tVerzFilter))
+
+    clock()
+
+
+def clock():
+    global current
+
+    # Istwerte werden aktualisiert
+    tistInterval.configure(text=str(current))
+    tistDauer.configure(text=str("Time"))
+    tistVerzFilter.configure(text=str("Time"))
+
+    root.after(1000, clock)
+
+
+def safe():
+    global tInterval
+    global tDauer
+    global tVerzFilter
+
+    # speichere Sollwerte
+    # Sollwert Interval
+    tInterval = tsollInterval.get()
+    tsollInterval.delete(0, END)
+    tsollInterval.insert(0, tInterval)
+
+    # Sollwert Dauer
+    tDauer = tsollDauer.get()
+    tsollDauer.delete(0, END)
+    tsollDauer.insert(0, str(tDauer))
+
+    # Sollwert Verzögerung Filter
+    tVerzFilter = tsollVerzFilter.get()
+    tsollVerzFilter.delete(0, END)
+    tsollVerzFilter.insert(0, str(tVerzFilter))
+
+    Time()
 
 
 "=== Visualisierung =========================================================================="
@@ -270,7 +364,8 @@ BtnStart = Button(labFeldRechts, command=lambda: start(True), text="Start", widt
 BtnStopp = Button(labFeldRechts, command=lambda: start(False), text="Stop", width=width, height=height, justify=justify,
                   bg=str(colBtn),
                   font=str(font))
-BtnSafe = Button(labFeldRechts, text="Speichern", width=width, height=height, justify=justify, bg=str(colBtn),
+BtnSafe = Button(labFeldRechts, command=safe, text="Speichern", width=width, height=height, justify=justify,
+                 bg=str(colBtn),
                  font=str(font))
 
 # Platzierung
@@ -311,6 +406,7 @@ BtnExit.grid(row=0, column=5, padx=(95, 0), pady=10)
 # Aufruf von Funktion
 # setzte standard Modus auf Hand
 setMode()
+clock()
 
 # Mainloop
 root.mainloop()
