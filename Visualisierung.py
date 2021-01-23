@@ -62,6 +62,7 @@ CurrentMode = Mode.Auto
 def start():
     global hmStart
     if BtnStart.config("bg")[-1] == str(Color):
+        BtnStart.config(bg=ColorStart)
         hmStart = True
     else:
         BtnStart.config(bg=str(Color))
