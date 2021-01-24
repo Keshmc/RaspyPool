@@ -1,18 +1,21 @@
 # imports
 from tkinter import *
 from PIL import ImageTk, Image
+from gpiozero import DigitalOutputDevice
 import time
 
 "=== Initialisierung ========================================================================="
 root = Tk()
 
 # Farben
-colBg = "#adc9c5"
+colBg = "#ffffff"
 colBtn = "#7e8282"
 colBtnAktiv = "#ebae2d"
-colBtnEin = "#08c43a"
+colBtnEin = "#11cd55"
 colBtnStart = "#6ceb2d"
 colBtnStop = "#f02805"
+colMeldung = "#000000"
+colAlarm = "#fd2a00"
 
 # Parameter
 imgPath = StringVar(root)
@@ -26,6 +29,12 @@ font = "Arial"
 padx = 5
 pady = 5
 
+# Definiere Output Pins
+# OutFilter = DigitalOutputDevice(6)
+# OutPumpe = DigitalOutputDevice(13)
+# OutHeizung = DigitalOutputDevice(19)
+# OutReserve = DigitalOutputDevice(26)
+
 "=== Bilder / Labels ========================================================================="
 # Grundbild (Root)
 root.title("Raspy Pool")
@@ -33,24 +42,34 @@ root.geometry("800x480")
 root.configure(bg=str(colBg))
 
 # Label für Projekttitel
-labTitel = Label(root, text="RaspyPool; IDPA Projekt 2020", relief=RAISED)
+labTitel = Label(root, text="RaspyPool; IDPA Projekt 2020", anchor=W, padx=50, pady=5, relief=RAISED, font=str(font))
 labTitel.grid(row=0, column=0, columnspan=6, sticky=W + E)
 
+# Label für Meldungen
+LabelMeldung = Label(root, text="Meldefenster", anchor=W, padx=50, pady=5, bg="#f2fcf5", font=str(font),
+                     fg=str(colMeldung), relief=SUNKEN, bd=5)
+LabelMeldung.grid(row=1, column=0, columnspan=6, sticky=W + E + N)
+LabelMeldung.grid_propagate(0)
+
+# Label für Hauptanzeige
+imgHome = ImageTk.PhotoImage(Image.open(imgPath.get()))
+labPicHome = Label(root, image=imgHome, bg=str(colBg), width=(800 - 105), height=330)
+labPicHome.grid(row=2, column=0, rowspan=4, columnspan=5)
+labPicHome.grid_propagate(0)
+
+# Label für pH-Sensor
+labPHSensor = Label(root, text="pH-Wert:  " + str(1), font=(str(font), 16))
+labPHSensor.grid(row=5, column=0)
+
 # Label für Tastenfeld rechts
-labFeldRechts = LabelFrame(root, width=105, height=400, bg=str(colBg))
-labFeldRechts.grid(row=1, column=5, sticky=E)
+labFeldRechts = LabelFrame(root, width=105, height=380, bg=str(colBg))
+labFeldRechts.grid(row=1, column=5, rowspan=5, sticky=E + N)
 labFeldRechts.grid_propagate(0)
 
 # Label für Tastenfeld unten
 labFeldUnten = LabelFrame(root, width=800, height=80, bg=str(colBg))
-labFeldUnten.grid(row=5, column=0, columnspan=6, sticky=W + E)
+labFeldUnten.grid(row=6, column=0, columnspan=6, sticky=W + E)
 labFeldUnten.grid_propagate(0)
-
-# Label für Hauptanzeige
-imgHome = ImageTk.PhotoImage(Image.open(imgPath.get()))
-labPicHome = Label(root, image=imgHome, width=(800 - 105), height=400)
-labPicHome.grid(row=1, column=0, rowspan=4, columnspan=4)
-labPicHome.grid_propagate(0)
 
 "=== Variabeln =========================================================================="
 # Globale Varialbeln
@@ -68,9 +87,13 @@ tVerzFilter = str("min")
 tDauer = str("min")
 
 # Istwerte
-tistInterval = Label()
-tistVerzFilter = Label()
-tistDauer = Label()
+istLabelTime = Label()
+istLabelVerzFilter = Label()
+istLabelDauer = Label()
+
+tistVerzFilter = float()
+tistDauer = float()
+
 
 # Zeiten
 current = time.strftime("%H:%M")
@@ -79,60 +102,125 @@ current = time.strftime("%H:%M")
 befPumpHand = BooleanVar(root)
 befFilterHand = BooleanVar(root)
 befHeatHand = BooleanVar(root)
-befPumpAuto = BooleanVar(root)
-befFilterAuto = BooleanVar(root)
-befHeatAuto = BooleanVar(root)
-befTime = BooleanVar(root)
-befTimeVerzFilter = BooleanVar(root)
+befOutAuto = BooleanVar(root)
+befOutAutoFilter = BooleanVar(root)
+befOutService = BooleanVar(root)
 
 "=== Funktionen =========================================================================="
-
-
-# Mainschlaufe des Ablaufs
-# wird mit Start() gestartet und mit Stopp() abgebrochen
-def Ablauf():
-    # Abbruchbedingung
-    if hmStart.get() is False:
-        return
-
-    root.after(1000, Ablauf)
 
 
 def Time():
     global tDauer
     global tInterval
     global tVerzFilter
-
+    global befOutAuto
+    global befOutAutoFilter
+    global tistDauer
+    global tistVerzFilter
 
     # wandle Zeiten in Floats zum Rechnen
-    actual = float(time.strftime("%H%M"))
-    ConvInterval = float(tInterval.replace(":", ""))
-    ConvtDauer = float(tDauer)
-    ConvFilter = float(tVerzFilter)
+    try:
+        actual = float(time.strftime("%H%M"))
+        ConvInterval = float(tInterval.replace(":", ""))
+        ConvtDauer = float(tDauer)
+        ConvFilter = float(tVerzFilter)
+
+        # Meldung
+        LabelMeldung.configure(text="Meldung: Sollwerte gespeichert", fg=str(colMeldung))
+
+    except ValueError:
+        # Meldung
+        LabelMeldung.configure(text="Alarm: Sollwerte konnten nicht gespeichert werden!", fg=str(colAlarm))
+        return
 
     # Berechne Endzeit
     if ConvtDauer > 60:
-        tEnd = ConvInterval + (ConvtDauer * 100/60)
+        tEnd = ConvInterval + (ConvtDauer * 100 / 60)
     else:
         tEnd = ConvInterval + ConvtDauer
 
     if ConvFilter > 60:
-        tFgFilter = ConvInterval + (ConvFilter * 100/60)
+        tFgFilter = ConvInterval + (ConvFilter * 100 / 60)
     else:
         tFgFilter = ConvInterval + ConvFilter
 
-    print("Ende =" + str(tEnd))
-    print("Filter =" + str(tFgFilter))
+    # Setzte befAuto
+    if ConvInterval <= actual < tEnd and Mode.get() == "auto":
+        befOutAuto.set(True)
+        tistDauer = tEnd - actual
+
+    else:
+        befOutAuto.set(False)
+        tistDauer = ConvtDauer
+
+    if tFgFilter <= actual <= tEnd and Mode.get() == "auto":
+        befOutAutoFilter.set(True)
+    else:
+        befOutAutoFilter.set(False)
+
+    # Berechnung Istwert Einschaltverzögerung Filter
+    if ConvInterval < actual < tFgFilter:
+        tistVerzFilter = tFgFilter - actual
+    else:
+        tistVerzFilter = ConvFilter
 
 
-    # Vergleich
-    if ConvInterval< actual < tEnd:
-        print("FgTime")
+# Mainschlaufe des Ablaufs
+# wird mit Start() gestartet und mit Stopp() abgebrochen
+def Ablauf():
+    global befOutAuto
+    global befOutAutoFilter
+    global befFilterHand
+    global befHeatHand
+    global befPumpHand
 
-    if tFgFilter < actual < tEnd:
-        print("Filter Ein")
+    # Abbruchbedingung
+    if hmStart.get() is False:
+        # setzte alle Befehle zurück
+        # Auto
+        befOutAuto.set(False)
+        befOutAutoFilter.set(False)
 
-    root.after(1000, Time)
+        # Hand
+        befPumpHand.set(False)
+        befHeatHand.set(False)
+        befFilterHand.set(False)
+
+        # Service
+        befOutService.set(False)
+
+        # setze alle Ausgänge zurück
+        # OutFilter.off()
+        # OutPumpe.off()
+        # OutHeizung.off()
+        # OutReserve.off()
+
+        # Meldung
+        LabelMeldung.configure(text="Meldung: Anlage stoppt. Modus wird zurückgesetzt.", fg=str(colMeldung))
+
+    # Out Pumpe
+    if befOutAuto.get() or befPumpHand.get() or befOutService.get():
+        # OutPumpe.on()
+        BtnPumpe.configure(bg=colBtnEin)
+    else:
+        # OutPumpe.off()
+        BtnPumpe.configure(bg=colBtn)
+
+    # Out Heizung
+    if befOutAuto.get() or befHeatHand.get() or befOutService.get():
+        # OutHeizung.on()
+        BtnHeat.configure(bg=colBtnEin)
+    else:
+        # OutHeizung.off()
+        BtnHeat.configure(bg=colBtn)
+
+    # Out Filter
+    if befFilterHand.get() or befOutAutoFilter.get() and not befOutService.get():
+        # OutFilter.on()
+        BtnFilter.configure(bg=colBtnEin)
+    else:
+        # OutFilter.off()
+        BtnFilter.configure(bg=colBtn)
 
 
 # Funktionen welche durch Buttons ausgeführt werden
@@ -141,20 +229,48 @@ def setMode(arg="dummy"):
     # Modus wird von Button über Argument mit (hand / auto oder service) beschrieben
     Mode.set(arg)
     Visualisierung(arg)
+
+    # setzte bef Service
+    if arg == "service":
+        befOutService.set(True)
+    else:
+        befOutService.set(False)
+
     return Mode.get()
 
 
 # Start / Stopp Funktion, startet die LoopFuntkion Ablauf()
 def start(val):
     hmStart.set(val)
+
+    if val:
+        BtnStart.configure(bg=colBtnStart)
+        BtnStopp.configure(bg=colBtn)
+    else:
+        BtnStart.configure(bg=colBtn)
+        BtnStopp.configure(bg=colBtnStop)
+
+    # Meldungen
+    if Mode.get() == "auto":
+        LabelMeldung.configure(text="Meldung: Modus Auto aktiv! (Zeitsteuerung)", fg=str(colMeldung))
+
+    if Mode.get() == "hand":
+        LabelMeldung.configure(text="Meldung: Modus Hand aktiv! Aktoren können manuell gesteuert werden.",
+                               fg=str(colMeldung))
+
+    if Mode.get() == "service":
+        LabelMeldung.configure(text="Meldung: Modus Service aktiv! UV-C Filter bleibt ausgeschalten.",
+                               fg=str(colMeldung))
+
     Ablauf()
 
 
 # Tastenfeld unten
 def pumpe():
     if BtnPumpe.config("bg")[-1] == str(colBtn):
-        BtnPumpe.config(bg=str(colBtnEin))
-        befPumpHand.set(True)
+        BtnPumpe.config(bg=str(colBtnAktiv))
+        if Mode.get() == "hand":
+            befPumpHand.set(True)
     else:
         BtnPumpe.config(bg=str(colBtn))
         befPumpHand.set(False)
@@ -162,8 +278,9 @@ def pumpe():
 
 def filtr():
     if BtnFilter.config("bg")[-1] == str(colBtn):
-        BtnFilter.config(bg=str(colBtnEin))
-        befFilterHand.set(True)
+        BtnFilter.config(bg=str(colBtnAktiv))
+        if Mode.get() == "hand":
+            befFilterHand.set(True)
     else:
         BtnFilter.config(bg=str(colBtn))
         befFilterHand.set(False)
@@ -171,22 +288,59 @@ def filtr():
 
 def heat():
     if BtnHeat.config("bg")[-1] == str(colBtn):
-        BtnHeat.config(bg=str(colBtnEin))
-        befHeatHand.set(True)
+        BtnHeat.config(bg=str(colBtnAktiv))
+        if Mode.get() == "hand":
+            befHeatHand.set(True)
     else:
         BtnHeat.config(bg=str(colBtn))
         befHeatHand.set(False)
 
 
+def phSensor():
+    global labPHSensor
+    # Hier muss variabel für pH-Wert gesetzt werden
+    val = 7
+
+    # pH-Wert von 0 bis 3 = rot
+    if 0 <= val <= 3:
+        labPHSensor.configure(text="pH-Wert:  " + str(val), bg="#ff0000")
+
+    # pH-Wert von 3 bis 6 = orange
+    if 3 < val <= 6:
+        labPHSensor.configure(text="pH-Wert:  " + str(val), bg="#fe9a00")
+
+    # pH-Wert von 6 bis 8 = grün
+    if 6 < val <= 8:
+        labPHSensor.configure(text="pH-Wert:  " + str(val), bg="#20fe06")
+
+    # pH-Wert von 8 bis 11 = hellblau
+    if 8 < val <= 11:
+        labPHSensor.configure(text="pH-Wert:  " + str(val), bg="#00cbf0")
+
+    # pH-Wert von 11 bis 14 = dunkelblau
+    if 11 < val <= 14:
+        labPHSensor.configure(text="pH-Wert:  " + str(val), bg="#6b65ec")
+
+    root.after(1000, phSensor)
+
+
 def home():
+    global labPHSensor
     global labPicHome
     global imgHome
 
+    # platziere Homebild
     labPicHome.grid_forget()
     imgHome = ImageTk.PhotoImage(Image.open(str(imgPath.get())))
-    labPicHome = Label(root, image=imgHome, width=(800 - 105), height=400)
-    labPicHome.grid(row=1, column=0, rowspan=4, columnspan=4)
+    labPicHome = Label(root, image=imgHome, bg=str(colBg), width=(800 - 105), height=330)
+    labPicHome.grid(row=2, column=0, rowspan=4, columnspan=5)
     labPicHome.grid_propagate(0)
+
+    # platziere pH-Wert
+    labPHSensor = Label(root, text="pH-Wert:  ", font=(str(font), 16))
+    labPHSensor.grid(row=5, column=0)
+
+    phSensor()
 
 
 def parameter():
@@ -194,20 +348,23 @@ def parameter():
     global tsollVerzFilter
     global tsollInterval
     global tsollDauer
-    global tistVerzFilter
-    global tistInterval
-    global tistDauer
+    global istLabelVerzFilter
+    global istLabelTime
+    global istLabelDauer
     global tInterval
     global tDauer
     global tVerzFilter
 
+    # Entferne Label für pH-Sensor
+    labPHSensor.grid_forget()
+
     # Labelfeld
     # Definition
     labPicHome.grid_forget()
-    labPicHome = LabelFrame(root, bg=str(colBg), width=(800 - 101), height=400)
+    labPicHome = LabelFrame(root, bg=str(colBg), width=(800 - 101), height=341)
 
     # Platzierung
-    labPicHome.grid(row=1, column=0, rowspan=4, columnspan=4)
+    labPicHome.grid(row=2, column=0, rowspan=4, columnspan=5)
     labPicHome.grid_propagate(0)
 
     # Labels und Texte
@@ -227,19 +384,19 @@ def parameter():
 
     # Eingabe / Ausgabefenster
     # Definiere Sollwerte
-    tsollInterval = Entry(labPicHome, width=15, font=str(font))
-    tsollVerzFilter = Entry(labPicHome, width=15, font=str(font))
-    tsollDauer = Entry(labPicHome, width=15, font=str(font))
+    tsollInterval = Entry(labPicHome, width=15, font=str(font), bd=3)
+    tsollVerzFilter = Entry(labPicHome, width=15, font=str(font), bd=3)
+    tsollDauer = Entry(labPicHome, width=15, font=str(font), bd=3)
 
     # Definiere Istwerte
-    tistInterval = Label(labPicHome, text=" ", width=15, font=str(font))
-    tistVerzFilter = Label(labPicHome, text="Time", width=15, font=str(font))
-    tistDauer = Label(labPicHome, text="Time", width=15, font=str(font))
+    istLabelTime = Label(labPicHome, text=" ", width=15, font=str(font))
+    istLabelVerzFilter = Label(labPicHome, text=" ", width=15, font=str(font))
+    istLabelDauer = Label(labPicHome, text=" ", width=15, font=str(font))
 
     # Platziere Istwert
-    tistInterval.grid(row=1, column=2)
-    tistVerzFilter.grid(row=2, column=2)
-    tistDauer.grid(row=3, column=2)
+    istLabelTime.grid(row=1, column=2)
+    istLabelVerzFilter.grid(row=2, column=2)
+    istLabelDauer.grid(row=3, column=2)
 
     # Platziere Sollwert
     tsollInterval.grid(row=1, column=1)
@@ -256,11 +413,17 @@ def parameter():
 
 def clock():
     global current
+    global tistDauer
+    global tistVerzFilter
+
+    # Zeiten updaten
+    current = time.strftime("%H:%M")
 
     # Istwerte werden aktualisiert
-    tistInterval.configure(text=str(current))
-    tistDauer.configure(text=str("Time"))
-    tistVerzFilter.configure(text=str("Time"))
+
+    istLabelTime.configure(text=str(current) + " Uhr")
+    istLabelDauer.configure(text=str(tistDauer) + " min")
+    istLabelVerzFilter.configure(text=str(tistVerzFilter) + " min")
 
     root.after(1000, clock)
 
@@ -272,19 +435,22 @@ def safe():
 
     # speichere Sollwerte
     # Sollwert Interval
-    tInterval = tsollInterval.get()
-    tsollInterval.delete(0, END)
-    tsollInterval.insert(0, tInterval)
+    a = tsollInterval.get()
+    tInterval = a.replace(" Uhr", "").replace("hh:mm", "")
+    tsollInterval.delete(0, "end")
+    tsollInterval.insert(0, str(tInterval) + " Uhr")
 
     # Sollwert Dauer
-    tDauer = tsollDauer.get()
-    tsollDauer.delete(0, END)
-    tsollDauer.insert(0, str(tDauer))
+    b = tsollDauer.get()
+    tDauer = b.replace(" min", "").replace("min", "")
+    tsollDauer.delete(0, "end")
+    tsollDauer.insert(0, str(tDauer) + " min")
 
     # Sollwert Verzögerung Filter
-    tVerzFilter = tsollVerzFilter.get()
-    tsollVerzFilter.delete(0, END)
-    tsollVerzFilter.insert(0, str(tVerzFilter))
+    c = tsollVerzFilter.get()
+    tVerzFilter = c.replace(" min", "").replace("min", "")
+    tsollVerzFilter.delete(0, "end")
+    tsollVerzFilter.insert(0, str(tVerzFilter) + " min")
 
     Time()
 
@@ -293,7 +459,12 @@ def safe():
 
 
 def Visualisierung(arg):
-    # Visualisierung nach Modus
+    m = StringVar(root)
+
+    # Ausgänge werden nach Moduswechsel zurückgesetzt
+    if m.get() != str(arg):
+        m.set(arg)
+        start(False)
 
     # Automodus
     if arg == "auto":
@@ -307,6 +478,9 @@ def Visualisierung(arg):
         BtnFilter.config(stat=DISABLED)
         BtnHeat.config(stat=DISABLED)
 
+        # Meldungen
+        LabelMeldung.configure(text="Meldung: Modus Auto angewählt. Start betätigen.", fg=str(colMeldung))
+
     # Handmodus
     if arg == "hand":
         # Buttons Modus
@@ -318,6 +492,9 @@ def Visualisierung(arg):
         BtnPumpe.config(stat=NORMAL)
         BtnFilter.config(stat=NORMAL)
         BtnHeat.config(stat=NORMAL)
+
+        # Meldungen
+        LabelMeldung.configure(text="Meldung: Modus Hand angewählt. Start betätigen.", fg=str(colMeldung))
 
     # Service Modus
     if arg == "service":
@@ -331,6 +508,9 @@ def Visualisierung(arg):
         BtnFilter.config(stat=DISABLED)
         BtnHeat.config(stat=DISABLED)
 
+        # Meldungen
+        LabelMeldung.configure(text="Meldung: Modus Service angewählt. Start betätigen.", fg=str(colMeldung))
+
     # kein Modus (dummy)
     if arg == "dummy":
         # Buttons Modus
@@ -342,6 +522,9 @@ def Visualisierung(arg):
         BtnPumpe.config(stat=DISABLED)
         BtnFilter.config(stat=DISABLED)
         BtnHeat.config(stat=DISABLED)
+
+        # Meldungen
+        LabelMeldung.configure(text="Alarm: kein Modus angewählt. Bitte Modus auswählen", fg=str(colAlarm))
 
     root.update()
 
@@ -407,6 +590,7 @@ BtnExit.grid(row=0, column=5, padx=(95, 0), pady=10)
 # setzte standard Modus auf Hand
 setMode()
 clock()
+phSensor()
 
 # Mainloop
 root.mainloop()
