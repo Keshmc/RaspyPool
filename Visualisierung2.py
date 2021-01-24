@@ -76,6 +76,7 @@ labFeldUnten.grid_propagate(0)
 Mode = StringVar(root)
 hmStart = BooleanVar(root)
 hmStart.set(True)
+hmSafe = BooleanVar(root)
 
 # Sollwerte
 tsollInterval = Entry(root)
@@ -93,7 +94,6 @@ istLabelDauer = Label()
 
 tistVerzFilter = float()
 tistDauer = float()
-
 
 # Zeiten
 current = time.strftime("%H:%M")
@@ -127,11 +127,17 @@ def Time():
 
         # Meldung
         LabelMeldung.configure(text="Meldung: Sollwerte gespeichert", fg=str(colMeldung))
+        hmSafe.set(True)
 
     except ValueError:
         # Meldung
         LabelMeldung.configure(text="Alarm: Sollwerte konnten nicht gespeichert werden!", fg=str(colAlarm))
+        hmSafe.set(False)
         return
+
+    # Meldung wenn tVerzFilter grösser ist als Dauer
+    if ConvFilter > ConvtDauer:
+        LabelMeldung.configure(text="Alarm: Verzögerung Filter grösser als Einschaltdauer!", fg=str(colAlarm))
 
     # Berechne Endzeit
     if ConvtDauer > 60:
@@ -145,7 +151,7 @@ def Time():
         tFgFilter = ConvInterval + ConvFilter
 
     # Setzte befAuto
-    if ConvInterval <= actual < tEnd and Mode.get() == "auto":
+    if ConvInterval <= actual < tEnd and Mode.get() == "auto" and hmSafe.get():
         befOutAuto.set(True)
         tistDauer = tEnd - actual
 
@@ -153,7 +159,7 @@ def Time():
         befOutAuto.set(False)
         tistDauer = ConvtDauer
 
-    if tFgFilter <= actual <= tEnd and Mode.get() == "auto":
+    if tFgFilter <= actual <= tEnd and Mode.get() == "auto" and hmSafe.get():
         befOutAutoFilter.set(True)
     else:
         befOutAutoFilter.set(False)
@@ -164,6 +170,7 @@ def Time():
     else:
         tistVerzFilter = ConvFilter
 
+    root.after(1000, Time)
 
 # Mainschlaufe des Ablaufs
 # wird mit Start() gestartet und mit Stopp() abgebrochen
@@ -173,6 +180,7 @@ def Ablauf():
     global befFilterHand
     global befHeatHand
     global befPumpHand
+    global hmSafe
 
     # Abbruchbedingung
     if hmStart.get() is False:
@@ -252,7 +260,14 @@ def start(val):
 
     # Meldungen
     if Mode.get() == "auto":
-        LabelMeldung.configure(text="Meldung: Modus Auto aktiv! (Zeitsteuerung)", fg=str(colMeldung))
+        if hmSafe.get():
+            LabelMeldung.configure(text="Meldung: Modus Auto aktiv! (Zeitsteuerung)", fg=str(colMeldung))
+        else:
+            LabelMeldung.configure(text="Alarm: Auto kann nicht gestartet werden. Sollwerte eingeben!",
+                                   fg=str(colAlarm))
+            # Configuriere StartButtons
+            BtnStart.configure(bg=colBtn)
+            BtnStopp.configure(bg=colBtnStop)
 
     if Mode.get() == "hand":
         LabelMeldung.configure(text="Meldung: Modus Hand aktiv! Aktoren können manuell gesteuert werden.",
@@ -552,7 +567,7 @@ BtnSafe = Button(labFeldRechts, command=safe, text="Speichern", width=width, hei
                  font=str(font))
 
 # Platzierung
-BtnAuto.grid(row=0, column=0, pady=5)
+BtnAuto.grid(row=0, column=0, pady=(40, 5))
 BtnHand.grid(row=1, column=0, pady=5)
 BtnService.grid(row=2, column=0, pady=5)
 BtnStart.grid(row=3, column=0, pady=(30, 5))
