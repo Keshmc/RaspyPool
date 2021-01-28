@@ -28,7 +28,6 @@ except FileNotFoundError:
     imgPath.set("HomeBild.png")
     Image.open(imgPath.get())
 
-
 # Parameter für Buttons
 height = 1
 width = 10
@@ -38,10 +37,13 @@ padx = 5
 pady = 5
 
 # Definiere Output Pins
-# OutFilter = DigitalOutputDevice(6)
-# OutPumpe = DigitalOutputDevice(13)
-# OutHeizung = DigitalOutputDevice(19)
-# OutReserve = DigitalOutputDevice(26)
+try:
+    OutFilter = DigitalOutputDevice(6)
+    OutPumpe = DigitalOutputDevice(13)
+    OutHeizung = DigitalOutputDevice(19)
+    OutReserve = DigitalOutputDevice(26)
+except:
+    pass
 
 "=== Bilder / Labels ========================================================================="
 # Grundbild (Root)
@@ -207,7 +209,6 @@ def Ablauf():
     global befPumpHand
     global hmSafe
 
-
     # Abbruchbedingung
     if hmStart.get() is False:
         # setzte alle Befehle zurück
@@ -352,10 +353,23 @@ def heat():
         befHeatHand.set(False)
 
 
+def callpHSensor():
+    # führe Bash-Script für pH-Wert Aufnahme aus
+    try:
+        call("bash /home/pi/RaspyPool/pH-Sensor.sh", shell=True)
+    except:
+        LabelMeldung.configure(text="Alarm: pH-Sensor konnte nicht gepingt werden", fg=colAlarm)
+        pass
+
+
 def phSensor():
     global labPHSensor
+
+    # Oeffne .txt Datei mit dem pH-Wert aus dem ftdi.py File
     # Hier muss variabel für pH-Wert gesetzt werden
-    val = 7
+    f = open("/home/pi/RaspyPool/pH-Sensor/ph.txt", "r")
+    val = float(f.read(5))
+    f.close()
 
     # pH-Wert von 0 bis 3 = rot
     if 0 <= val <= 3:
@@ -395,6 +409,9 @@ def home():
     # platziere pH-Wert
     labPHSensor = Label(root, text="pH-Wert:  ", font=(str(font), 16))
     labPHSensor.grid(row=5, column=0)
+
+    # führe Bash-Script für pH-Wert Aufnahem aus
+    callpHSensor()
     phSensor()
 
 
