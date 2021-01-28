@@ -42,7 +42,7 @@ try:
     OutPumpe = DigitalOutputDevice(13)
     OutHeizung = DigitalOutputDevice(19)
     OutReserve = DigitalOutputDevice(26)
-except:
+except ModuleNotFoundError:
     pass
 
 "=== Bilder / Labels ========================================================================="
@@ -357,7 +357,7 @@ def callpHSensor():
     # führe Bash-Script für pH-Wert Aufnahme aus
     try:
         call("bash /home/pi/RaspyPool/pH-Sensor.sh", shell=True)
-    except:
+    except FileNotFoundError:
         LabelMeldung.configure(text="Alarm: pH-Sensor konnte nicht gepingt werden", fg=colAlarm)
         pass
 
@@ -367,9 +367,12 @@ def phSensor():
 
     # Oeffne .txt Datei mit dem pH-Wert aus dem ftdi.py File
     # Hier muss variabel für pH-Wert gesetzt werden
-    f = open("/home/pi/RaspyPool/pH-Sensor/ph.txt", "r")
-    val = float(f.read(5))
-    f.close()
+    try:
+        f = open("/home/pi/RaspyPool/pH-Sensor/ph.txt", "r")
+        val = float(f.read(5))
+        f.close()
+    except FileNotFoundError:
+        val = 0
 
     # pH-Wert von 0 bis 3 = rot
     if 0 <= val <= 3:
@@ -417,7 +420,7 @@ def home():
 
 # Call Funktionen für Tastatur
 
-def callback(event):
+def callback():
     global hmKeyboard
     hmKeyboard = BooleanVar(root)
     try:
@@ -425,19 +428,19 @@ def callback(event):
         if hmKeyboard.get() == 0:
             call("bash /home/pi/RaspyPool/open.sh", shell=True)
             hmKeyboard.set(True)
-    except:
+    except FileNotFoundError:
         hmKeyboard.set(False)
         pass
 
 
-def callout(event):
+def callout():
     global hmKeyboard
     hmKeyboard = BooleanVar(root)
     try:
         # Shell Script nimmt PID und schliesst Tastatur
         call("bash /home/pi/RaspyPool/close.sh", shell=True)
         hmKeyboard.set(0)
-    except:
+    except FileNotFoundError:
         pass
 
 
