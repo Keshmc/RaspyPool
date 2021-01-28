@@ -1,0 +1,4 @@
+[Desktop Entry]
+Exec=sh /usr/bin/MyApp.sh
+Terminal=false
+
