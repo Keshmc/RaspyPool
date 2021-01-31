@@ -15,8 +15,9 @@ colBtnAktiv = "#ebae2d"
 colBtnEin = "#11cd55"
 colBtnStart = "#6ceb2d"
 colBtnStop = "#f02805"
-colMeldung = "#000000"
-colAlarm = "#fd2a00"
+colFgBtn = "#FFFFFF"
+colBgMeldung = "#dafdfe"
+colBgAlarm = "#f1c4c4"
 
 # Parameter
 imgPath = StringVar(root)
@@ -52,19 +53,20 @@ root.geometry("800x480")
 root.configure(bg=str(colBg))
 
 # Label für Projekttitel
-labTitel = Label(root, text="RaspyPool; IDPA Projekt 2020", anchor=W, padx=50, pady=5, relief=RAISED, font=str(font))
+labTitel = Label(root, text="RaspyPool; IDPA Projekt 2020", anchor=W, padx=50, pady=5, relief=RAISED, font=str(font),
+                 bg=colBtn, fg=str(colFgBtn), bd=0)
 labTitel.grid(row=0, column=0, columnspan=6, sticky=W + E)
 
 # Label für Meldungen
-LabelMeldung = Label(root, text="Meldefenster", anchor=W, padx=50, pady=5, bg="#f2fcf5", font=str(font),
-                     fg=str(colMeldung), relief=SUNKEN, bd=5)
+LabelMeldung = Label(root, text="Meldefenster", anchor=W, padx=50, pady=5, bg=str(colBgMeldung), font=str(font),
+                     relief=SUNKEN, bd=3)
 LabelMeldung.grid(row=1, column=0, columnspan=6, sticky=W + E + N)
 LabelMeldung.grid_propagate(0)
 
 # Label für Hauptanzeige
 
 imgHome = ImageTk.PhotoImage(Image.open(imgPath.get()))
-labPicHome = Label(root, image=imgHome, bg=str(colBg), width=(800 - 120), height=330)
+labPicHome = Label(root, image=imgHome, bg=str(colBg), width=(800 - 120), height=330, bd=0)
 labPicHome.grid(row=2, column=0, rowspan=4, columnspan=5)
 labPicHome.grid_propagate(0)
 
@@ -73,12 +75,12 @@ labPHSensor = Label(root, text="pH-Wert:  " + str(1), font=(str(font), 16))
 labPHSensor.grid(row=5, column=0)
 
 # Label für Tastenfeld rechts
-labFeldRechts = LabelFrame(root, width=120, height=380, bg=str(colBg))
+labFeldRechts = LabelFrame(root, width=120, height=382, bg=str(colBg), bd=1)
 labFeldRechts.grid(row=1, column=5, rowspan=5, sticky=E + N)
 labFeldRechts.grid_propagate(0)
 
 # Label für Tastenfeld unten
-labFeldUnten = LabelFrame(root, width=800, height=80, bg=str(colBg))
+labFeldUnten = LabelFrame(root, width=800, height=80, bg=str(colBg), bd=1)
 labFeldUnten.grid(row=6, column=0, columnspan=6, sticky=W + E)
 labFeldUnten.grid_propagate(0)
 
@@ -89,6 +91,8 @@ hmStart = BooleanVar(root)
 hmStart.set(True)
 hmSafe = BooleanVar(root)
 hmKeyboard = BooleanVar(root).set(0)
+hmMode = StringVar(root)
+hmMode.set("dummy")
 
 # Sollwerte
 tsollInterval = Entry(root)
@@ -140,12 +144,12 @@ def Time():
         ConvFilter = float(tVerzFilter)
 
         # Meldung
-        LabelMeldung.configure(text="Meldung: Sollwerte gespeichert", fg=str(colMeldung))
+        LabelMeldung.configure(text="Meldung: Sollwerte gespeichert", bg=str(colBgMeldung))
         hmSafe.set(True)
 
     except ValueError:
         # Meldung
-        LabelMeldung.configure(text="Alarm: Sollwerte konnten nicht gespeichert werden!", fg=str(colAlarm))
+        LabelMeldung.configure(text="Alarm: Sollwerte sind ungültig!", bg=str(colBgAlarm))
         hmSafe.set(False)
         return
 
@@ -165,7 +169,7 @@ def compTime():
 
     # Meldung wenn tVerzFilter grösser ist als Dauer
     if ConvFilter > ConvtDauer:
-        LabelMeldung.configure(text="Alarm: Verzögerung Filter grösser als Einschaltdauer!", fg=str(colAlarm))
+        LabelMeldung.configure(text="Alarm: Verzögerung Filter grösser als Einschaltdauer!", bg=str(colBgAlarm))
 
     # Berechne Endzeit
     if ConvtDauer > 60:
@@ -197,6 +201,16 @@ def compTime():
         tistVerzFilter = tFgFilter - actual
     else:
         tistVerzFilter = ConvFilter
+
+
+# Funktionen welche durch Buttons ausgeführt werden
+# Betriebsmodus (Standard = Hand)
+def setMode(arg="dummy"):
+    # Modus wird von Button über Argument mit (hand / auto oder service) beschrieben
+    Mode.set(arg)
+    Visualisierung(arg)
+
+    return Mode.get()
 
 
 # Mainschlaufe des Ablaufs
@@ -240,7 +254,7 @@ def Ablauf():
             pass
 
         # Meldung
-        LabelMeldung.configure(text="Meldung: Anlage stoppt.", fg=str(colMeldung))
+        LabelMeldung.configure(text="Meldung: Anlage stoppt.", bg=str(colBgMeldung))
         return
 
     # Frage Fkt Zeitvergleich auto ab
@@ -280,16 +294,6 @@ def Ablauf():
     root.after(1000, Ablauf)
 
 
-# Funktionen welche durch Buttons ausgeführt werden
-# Betriebsmodus (Standard = Hand)
-def setMode(arg="dummy"):
-    # Modus wird von Button über Argument mit (hand / auto oder service) beschrieben
-    Mode.set(arg)
-    Visualisierung(arg)
-
-    return Mode.get()
-
-
 # Start / Stopp Funktion, startet die LoopFuntkion Ablauf()
 def start(val):
     hmStart.set(val)
@@ -304,21 +308,21 @@ def start(val):
     # Meldungen
     if Mode.get() == "auto":
         if hmSafe.get():
-            LabelMeldung.configure(text="Meldung: Modus Auto aktiv! (Zeitsteuerung)", fg=str(colMeldung))
+            LabelMeldung.configure(text="Meldung: Modus Auto aktiv! (Zeitsteuerung)", bg=str(colBgMeldung))
         else:
-            LabelMeldung.configure(text="Alarm: Auto kann nicht gestartet werden. Sollwerte eingeben!",
-                                   fg=str(colAlarm))
+            LabelMeldung.configure(text="Alarm: Auto kann nicht gestartet werden. Parameter eingeben!",
+                                   bg=str(colBgAlarm))
             # Configuriere StartButtons
             BtnStart.configure(bg=colBtn)
             BtnStopp.configure(bg=colBtnStop)
 
     if Mode.get() == "hand":
         LabelMeldung.configure(text="Meldung: Modus Hand aktiv! Aktoren können manuell gesteuert werden.",
-                               fg=str(colMeldung))
+                               bg=str(colBgMeldung))
 
     if Mode.get() == "service":
         LabelMeldung.configure(text="Meldung: Modus Service aktiv! UV-C Filter bleibt ausgeschalten.",
-                               fg=str(colMeldung))
+                               bg=str(colBgMeldung))
     Ablauf()
 
 
@@ -358,7 +362,7 @@ def callpHSensor():
     try:
         call("bash /home/pi/RaspyPool/pH-Sensor.sh", shell=True)
     except FileNotFoundError:
-        LabelMeldung.configure(text="Alarm: pH-Sensor konnte nicht gepingt werden", fg=colAlarm)
+        LabelMeldung.configure(text="Alarm: pH-Sensor konnte nicht gepingt werden", bg=str(colBgAlarm))
         pass
 
 
@@ -405,7 +409,7 @@ def home():
     # platziere Homebild
     labPicHome.grid_forget()
     imgHome = ImageTk.PhotoImage(Image.open(str(imgPath.get())))
-    labPicHome = Label(root, image=imgHome, bg=str(colBg), width=(800 - 120), height=330)
+    labPicHome = Label(root, image=imgHome, bg=str(colBg), width=(800 - 120), height=330, bd=0)
     labPicHome.grid(row=2, column=0, rowspan=4, columnspan=5)
     labPicHome.grid_propagate(0)
 
@@ -462,7 +466,7 @@ def parameter():
     # Labelfeld
     # Definition
     labPicHome.grid_forget()
-    labPicHome = LabelFrame(root, bg=str(colBg), width=(800 - 116), height=335)
+    labPicHome = LabelFrame(root, bg=str(colBg), width=(800 - 120), height=330, bd=0)
 
     # schliesse Bildschirmtastatur beim rauscklicken
     labPicHome.bind("<Button-1>", callout)
@@ -475,7 +479,7 @@ def parameter():
     # Definition der Labels für Texte
     TxtIstwert = Label(labPicHome, text="Sollwert", width=15, font=font)
     TxtSollwert = Label(labPicHome, text="Istwert", width=15, font=font)
-    TxtInterval = Label(labPicHome, text="Einschaltzeit: ", width=25, anchor=W, font=font)
+    TxtInterval = Label(labPicHome, text="Startzeit: ", width=25, anchor=W, font=font)
     TxtVerzFilter = Label(labPicHome, text="Einschaltverzögerung Filter: ", width=25, anchor=W, font=font)
     TxtDauer = Label(labPicHome, text="Einschaltdauer: ", width=25, anchor=W, font=font)
 
@@ -568,11 +572,11 @@ def safe():
 
 
 def Visualisierung(arg):
-    m = StringVar(root)
+    global hmMode
 
     # Ausgänge werden nach Moduswechsel zurückgesetzt
-    if m.get() != str(arg):
-        m.set(arg)
+    if hmMode.get() != str(arg):
+        hmMode.set(arg)
         start(False)
 
     # Automodus
@@ -588,7 +592,7 @@ def Visualisierung(arg):
         BtnHeat.config(stat=DISABLED)
 
         # Meldungen
-        LabelMeldung.configure(text="Meldung: Modus Auto angewählt. Start betätigen.", fg=str(colMeldung))
+        LabelMeldung.configure(text="Meldung: Modus Auto angewählt. Start betätigen.", bg=colBgMeldung)
 
     # Handmodus
     if arg == "hand":
@@ -603,7 +607,7 @@ def Visualisierung(arg):
         BtnHeat.config(stat=NORMAL)
 
         # Meldungen
-        LabelMeldung.configure(text="Meldung: Modus Hand angewählt. Start betätigen.", fg=str(colMeldung))
+        LabelMeldung.configure(text="Meldung: Modus Hand angewählt. Start betätigen.", bg=str(colBgMeldung))
 
     # Service Modus
     if arg == "service":
@@ -618,7 +622,7 @@ def Visualisierung(arg):
         BtnHeat.config(stat=DISABLED)
 
         # Meldungen
-        LabelMeldung.configure(text="Meldung: Modus Service angewählt. Start betätigen.", fg=str(colMeldung))
+        LabelMeldung.configure(text="Meldung: Modus Service angewählt. Start betätigen.", bg=str(colBgMeldung))
 
     # kein Modus (dummy)
     if arg == "dummy":
@@ -633,7 +637,7 @@ def Visualisierung(arg):
         BtnHeat.config(stat=DISABLED)
 
         # Meldungen
-        LabelMeldung.configure(text="Alarm: kein Modus angewählt. Bitte Modus auswählen", fg=str(colAlarm))
+        LabelMeldung.configure(text="Alarm: kein Modus angewählt. Bitte Modus auswählen", bg=str(colBgAlarm))
 
     root.update()
 
@@ -643,21 +647,21 @@ def Visualisierung(arg):
 # Definition
 BtnAuto = Button(labFeldRechts, command=lambda: setMode("auto"), text="Auto", width=width, height=height,
                  justify=justify, bg=str(colBtn),
-                 font=str(font))
+                 font=str(font), fg=str(colFgBtn))
 BtnHand = Button(labFeldRechts, text="Hand", command=lambda: setMode("hand"), width=width, height=height,
                  justify=justify, bg=str(colBtn),
-                 font=str(font))
+                 font=str(font), fg=str(colFgBtn))
 BtnService = Button(labFeldRechts, command=lambda: setMode("service"), text="Service", width=width, height=height,
                     justify=justify, bg=str(colBtn),
-                    font=str(font))
+                    font=str(font), fg=str(colFgBtn))
 BtnStart = Button(labFeldRechts, command=lambda: start(True), text="Start", width=width, height=height, justify=justify,
                   bg=str(colBtn),
-                  font=str(font))
+                  font=str(font), fg=str(colFgBtn))
 BtnStopp = Button(labFeldRechts, command=lambda: start(False), text="Stop", width=width, height=height, justify=justify,
                   bg=str(colBtn),
-                  font=str(font))
+                  font=str(font), fg=str(colFgBtn))
 BtnSafe = Button(labFeldRechts, command=safe, text="  speichern", width=width, height=height, justify=justify,
-                 bg=str(colBtn), font=str(font), anchor=W)
+                 bg=str(colBtn), font=str(font), anchor=W, fg=str(colFgBtn))
 
 # Platzierung
 BtnAuto.grid(row=0, column=0, pady=(10, 5))
@@ -670,19 +674,19 @@ BtnSafe.grid(row=5, column=0, pady=10)
 # Buttons fürs Tastenfeld unten
 # Definition
 BtnHome = Button(labFeldUnten, command=home, text="Home", width=width, height=height, justify=justify, bg=str(colBtn),
-                 font=str(font))
+                 font=str(font), fg=str(colFgBtn))
 BtnPumpe = Button(labFeldUnten, command=pumpe, text="Pumpe", width=width, height=height, justify=justify,
                   bg=str(colBtn),
-                  font=str(font))
+                  font=str(font), fg=str(colFgBtn))
 BtnFilter = Button(labFeldUnten, command=filtr, text="Filter", width=width, height=height, justify=justify,
                    bg=str(colBtn),
-                   font=str(font))
+                   font=str(font), fg=str(colFgBtn))
 BtnHeat = Button(labFeldUnten, command=heat, text="Heizung", width=width, height=height, justify=justify,
                  bg=str(colBtn),
-                 font=str(font))
+                 font=str(font), fg=str(colFgBtn))
 BtnParameters = Button(labFeldUnten, command=parameter, text="Parameters", width=width, height=height, justify=justify,
                        bg=str(colBtn),
-                       font=str(font))
+                       font=str(font), fg=str(colFgBtn))
 
 # Platzierung
 BtnHome.grid(row=0, column=0, padx=5, pady=10)
