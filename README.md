@@ -4,8 +4,9 @@ but can be run on any computer. The Poolsteering can control the following devic
 - a filter pump
 - a UVC filter 
 - a heater
+- a pH-Sensor from Atlas Scientific (USB)
 
-To ensure the function of the steering, the hardware has to be rebuilt according to the Wiring Diagram and Dispo. We used the pH-Sample from Atlas Scientif. 
+To ensure the function of the steering, the hardware has to be rebuilt according to the Wiring Diagram and Dispo. We used the pH-Sample from Atlas Scientific. 
 For more Information and Details to the Hardware and Software see the RaspyPool.docx.
 
 # Installation
