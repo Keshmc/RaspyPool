@@ -6,6 +6,7 @@ from gpiozero import DigitalOutputDevice
 import time
 
 "=== Initialisierung ========================================================================="
+"IDPA Project developed by Jens, Marc and Jun"
 root = Tk()
 
 # Farben
