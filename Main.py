@@ -425,7 +425,7 @@ def home():
 
 # Call Funktionen für Tastatur
 
-def callback():
+def callback(i):
     global hmKeyboard
     hmKeyboard = BooleanVar(root)
     try:
@@ -438,7 +438,7 @@ def callback():
         pass
 
 
-def callout():
+def callout(i):
     global hmKeyboard
     hmKeyboard = BooleanVar(root)
     try:
@@ -500,7 +500,7 @@ def parameter():
     # bef Oeffne Bildschirmtastatur
     tsollInterval.bind("<FocusIn>", callback)
     tsollVerzFilter.bind("<FocusIn>", callback)
-    tsollVerzFilter.bind("<FocusIn>", callback)
+    tsollDauer.bind("<FocusIn>", callback)
 
     # Definiere Istwerte
     istLabelTime = Label(labPicHome, text=" ", width=15, font=str(font))
