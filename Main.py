@@ -186,8 +186,14 @@ def compTime():
     # Setzte befAuto
     if ConvInterval <= actual < tEnd and Mode.get() == "auto" and hmSafe.get():
         befOutAuto.set(True)
-        tistDauer = tEnd - actual
+        if ConvtDauer > 60:
+            tistDauer = tEnd - actual - 40
+        else:
+            tistDauer = tEnd - actual
 
+        print("Dauer =" + str(tistDauer))
+        print("Ende =" + str(tEnd))
+        print("actual =" + str(actual))
     else:
         befOutAuto.set(False)
         tistDauer = ConvtDauer
@@ -199,7 +205,11 @@ def compTime():
 
     # Berechnung Istwert Einschaltverzögerung Filter
     if ConvInterval < actual < tFgFilter:
-        tistVerzFilter = tFgFilter - actual
+        if tFgFilter > 60:
+            tistVerzFilter = (tFgFilter - actual) - 40
+        else:
+            tistVerzFilter = (tFgFilter - actual)
+
     else:
         tistVerzFilter = ConvFilter
 
