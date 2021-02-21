@@ -7,7 +7,7 @@ but can be run on any System where Python is installed. The Poolsteering can con
 - a pH-Sensor from Atlas Scientific (USB)
 
 To ensure the function of the steering, the hardware has to be rebuilt according to the Wiring Diagram and Dispo. We used the pH-Sample from [Atlas Scientific.](https://atlas-scientific.com/carrier-boards/electrically-isolated-usb-ezo-carrier-board/)
-For more Information and Details to the Hardware and Software see the [Dokumentation_DE.](../master/Dokumentation_DE)
+For more Information and Details to the Hardware and Software see the [Dokumentation_DE.](../master/Dokumentation_DE/IDPA_Poolsteuerung_Dokumentation.pdf)
 
 # Installation on Raspberry Pi
 This is a provisional installation guide. A detailed version is still in work.
@@ -29,7 +29,7 @@ The autostart should work now. The RaspyPool will run automatically after a rebo
 $ sudo reboot 
 ```
 
-For more Information see the [Dokumentation_DE.](../RapyPool/Dokumentation_DE)
+For more Information see the [Dokumentation_DE.](../master/Dokumentation_DE/IDPA_Poolsteuerung_Dokumentation.pdf)
 
 
 # Installation on your PC
@@ -52,7 +52,7 @@ The project can be executed on the PC. The following functions cannot be guarant
    3.2 got to `file > open > "Main.py" ` from the downloaded RaspyPool Folder <br/>
    3.3 the Main.py opens. Go to `run` and execute the File <br/>
 
-For more Information see the [Dokumentation_DE.](../RapyPool/Dokumentation_DE.)
+For more Information see the [Dokumentation_DE.](../master/Dokumentation_DE/IDPA_Poolsteuerung_Dokumentation.pdf)
 
 
 
