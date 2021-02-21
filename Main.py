@@ -6,7 +6,8 @@ from gpiozero import DigitalOutputDevice
 import time
 
 "=== Initialisierung ========================================================================="
-"IDPA Project developed by Jens, Marc and Jun"
+"===IDPA Project developed by Jens, Marc and Jun ============================================="
+"=== GBS St.Gallen ============================================================================"
 root = Tk()
 
 # Farben
@@ -22,7 +23,6 @@ colBgAlarm = "#f1c4c4"
 
 # Parameter
 imgPath = StringVar(root)
-
 try:
     imgPath.set("/home/pi/RaspyPool/HomeBild.png")
     Image.open(imgPath.get())
@@ -96,13 +96,13 @@ hmMode = StringVar(root)
 hmMode.set("dummy")
 
 # Sollwerte
-tsollInterval = Entry(root)
+tsollStartTime = Entry(root)
 tsollVerzFilter = Entry(root)
-tsollDauer = Entry(root)
+tsollEinschaltDauer = Entry(root)
 
-tInterval = str("#Wert")
+tStartTime = str("#Wert")
 tVerzFilter = str("#Wert")
-tDauer = str("#Wert")
+tEinschaltDauer = str("#Wert")
 
 # Istwerte
 istLabelTime = Label()
@@ -127,101 +127,97 @@ befOutAuto = BooleanVar(root)
 befOutAutoFilter = BooleanVar(root)
 befOutService = BooleanVar(root)
 
-"=== Funktionen =========================================================================="
+"=== Zeit Funktionen ======================================================================="
 
 
 def Time():
-    global tDauer
-    global tInterval
+    # Errorhandling Zeitsteuerung
+    global tEinschaltDauer
     global tVerzFilter
-    global ConvInterval
-    global ConvtDauer
-    global ConvFilter
+    print(tVerzFilter)
+    print(tEinschaltDauer)
 
-    # wandle Zeiten in Floats zum Rechnen
-    try:
-        ConvInterval = float(tInterval.replace(":", ""))
-        ConvtDauer = float(tDauer)
-        ConvFilter = float(tVerzFilter)
-
-        # Meldung
-        LabelMeldung.configure(text="Meldung: Sollwerte gespeichert", bg=str(colBgMeldung))
-        hmSafe.set(True)
-
-    except ValueError:
-        # Meldung
-        LabelMeldung.configure(text="Alarm: Sollwerte sind ungültig!", bg=str(colBgAlarm))
+    # Meldung wenn tVerzFilter grösser ist als Dauer
+    if int(tVerzFilter) > int(tEinschaltDauer):
+        LabelMeldung.configure(text="Alarm: Verzögerung Filter grösser als Einschaltdauer!", bg=str(colBgAlarm))
         hmSafe.set(False)
-        return
+
+
+    else:
+        try:
+            # Meldung
+            LabelMeldung.configure(text="Meldung: Sollwerte gespeichert", bg=str(colBgMeldung))
+            hmSafe.set(True)
+
+        except ValueError:
+            # Meldung
+            LabelMeldung.configure(text="Alarm: Sollwerte sind ungültig!", bg=str(colBgAlarm))
+            hmSafe.set(False)
+            return
+
+
+def IstWertTime(Hend, Hcurrent, Mend, Mcurrent):
+    # Baustein fuer Istwert Berechnung
+    H = Hend - Hcurrent
+    m = Mend - Mcurrent
+
+    Ist = int(m + (H * 60))
+    return Ist
 
 
 def compTime():
+    # Zeitvergleich und Istwert Berechnung
     global befOutAuto
     global befOutAutoFilter
     global tistDauer
     global tistVerzFilter
     global actual
-    global ConvInterval
-    global ConvtDauer
-    global ConvFilter
+
+    global tStartTime
+    global tEinschaltDauer
+    global tVerzFilter
+
+    # Vergleiche aktuelle Zeit
+    Hour = float(time.strftime("%H"))
+    Min = float(time.strftime("%M"))
+
+    # Convertiere Zeit
+    hStartTime, a = divmod(float(tStartTime), 1)
+    mStartTime = round(a * 100)
+
+    hDauer, mDauer = divmod(float(tEinschaltDauer), 60)
+    hVerzFilter, mVerzFilter = divmod(float(tVerzFilter), 60)
+
+    hEnd = hStartTime + hDauer
+    mEnd = mStartTime + mDauer
 
     # Vergleiche aktuelle Zeit
     actual = float(time.strftime("%H%M"))
 
-    # Meldung wenn tVerzFilter grösser ist als Dauer
-    if ConvFilter > ConvtDauer:
-        LabelMeldung.configure(text="Alarm: Verzögerung Filter grösser als Einschaltdauer!", bg=str(colBgAlarm))
+    # Starte Auto wenn Startzeit die Current Zeit erreicht
+    if Mode.get() == "auto" and hmSafe.get():
+        if hEnd >= Hour >= hStartTime and mEnd >= Min >= mStartTime or hEnd > Hour >= hStartTime:
+            befOutAuto.set(True)
 
-    # Berechne Endzeit
-    if ConvtDauer > 60:
-        tEnd = ConvInterval + (ConvtDauer * 100 / 60)
-    else:
-        tEnd = ConvInterval + ConvtDauer
+            # Berechnung Istwert Einschaltdauer
+            tistDauer = IstWertTime(hEnd, Hour, mEnd, Min)
 
-    if ConvFilter > 60:
-        tFgFilter = ConvInterval + (ConvFilter * 100 / 60)
-    else:
-        tFgFilter = ConvInterval + ConvFilter
+            # Berechnung Istwert Filter
+            tistVerzFilter = IstWertTime(0, 0, (mStartTime + mVerzFilter), Min)
 
-    # Setzte befAuto
-    if ConvInterval <= actual < tEnd and Mode.get() == "auto" and hmSafe.get():
-        befOutAuto.set(True)
-        if ConvtDauer > 60:
-            tistDauer = tEnd - actual - 40
+            # Verzögerung Filter
+            if Hour >= (hStartTime + hVerzFilter) and Min >= (mStartTime + mVerzFilter):
+                befOutAutoFilter.set(True)
+
+
         else:
-            tistDauer = tEnd - actual
-
-        print("Dauer =" + str(tistDauer))
-        print("Ende =" + str(tEnd))
-        print("actual =" + str(actual))
-    else:
-        befOutAuto.set(False)
-        tistDauer = ConvtDauer
-
-    if tFgFilter <= actual <= tEnd and Mode.get() == "auto" and hmSafe.get():
-        befOutAutoFilter.set(True)
-    else:
-        befOutAutoFilter.set(False)
-
-    # Berechnung Istwert Einschaltverzögerung Filter
-    if ConvInterval < actual < tFgFilter:
-        if tFgFilter > 60:
-            tistVerzFilter = (tFgFilter - actual) - 40
-        else:
-            tistVerzFilter = (tFgFilter - actual)
-
-    else:
-        tistVerzFilter = ConvFilter
+            befOutAuto.set(False)
+            tistDauer = mDauer + (hDauer * 60)
+            befOutAutoFilter.set(False)
+            tistVerzFilter = mVerzFilter + (hVerzFilter * 60)
 
 
-# Funktionen welche durch Buttons ausgeführt werden
-# Betriebsmodus (Standard = Hand)
-def setMode(arg="dummy"):
-    # Modus wird von Button über Argument mit (hand / auto oder service) beschrieben
-    Mode.set(arg)
-    Visualisierung(arg)
-
-    return Mode.get()
+"=== Main ============================================================================="
 
 
 # Mainschlaufe des Ablaufs
@@ -303,6 +299,19 @@ def Ablauf():
         BtnFilter.configure(bg=colBtn)
 
     root.after(1000, Ablauf)
+
+
+"=== Tasten Funktionen ======================================================================="
+
+
+# Funktionen welche durch Buttons ausgeführt werden
+# Betriebsmodus (Standard = Hand)
+def setMode(arg="dummy"):
+    # Modus wird von Button über Argument mit (hand / auto oder service) beschrieben
+    Mode.set(arg)
+    Visualisierung(arg)
+
+    return Mode.get()
 
 
 # Start / Stopp Funktion, startet die LoopFuntkion Ablauf()
@@ -462,13 +471,13 @@ def callout(i):
 def parameter():
     global labPicHome
     global tsollVerzFilter
-    global tsollInterval
-    global tsollDauer
+    global tsollStartTime
+    global tsollEinschaltDauer
     global istLabelVerzFilter
     global istLabelTime
     global istLabelDauer
-    global tInterval
-    global tDauer
+    global tStartTime
+    global tEinschaltDauer
     global tVerzFilter
 
     # Entferne Label für pH-Sensor
@@ -503,14 +512,14 @@ def parameter():
 
     # Eingabe / Ausgabefenster
     # Definiere Sollwerte
-    tsollInterval = Entry(labPicHome, width=15, font=str(font), bd=3)
+    tsollStartTime = Entry(labPicHome, width=15, font=str(font), bd=3)
     tsollVerzFilter = Entry(labPicHome, width=15, font=str(font), bd=3)
-    tsollDauer = Entry(labPicHome, width=15, font=str(font), bd=3)
+    tsollEinschaltDauer = Entry(labPicHome, width=15, font=str(font), bd=3)
 
     # bef Oeffne Bildschirmtastatur
-    tsollInterval.bind("<FocusIn>", callback)
+    tsollStartTime.bind("<FocusIn>", callback)
     tsollVerzFilter.bind("<FocusIn>", callback)
-    tsollDauer.bind("<FocusIn>", callback)
+    tsollEinschaltDauer.bind("<FocusIn>", callback)
 
     # Definiere Istwerte
     istLabelTime = Label(labPicHome, text=" ", width=15, font=str(font))
@@ -523,13 +532,13 @@ def parameter():
     istLabelDauer.grid(row=3, column=2)
 
     # Platziere Sollwert
-    tsollInterval.grid(row=1, column=1)
+    tsollStartTime.grid(row=1, column=1)
     tsollVerzFilter.grid(row=2, column=1)
-    tsollDauer.grid(row=3, column=1)
+    tsollEinschaltDauer.grid(row=3, column=1)
 
     # setze Sollwert
-    tsollInterval.insert(0, str(tInterval) + " Uhr")
-    tsollDauer.insert(0, str(tDauer) + " min")
+    tsollStartTime.insert(0, str(tStartTime) + " Uhr")
+    tsollEinschaltDauer.insert(0, str(tEinschaltDauer) + " min")
     tsollVerzFilter.insert(0, str(tVerzFilter) + " min")
 
     clock()
@@ -553,22 +562,22 @@ def clock():
 
 
 def safe():
-    global tInterval
-    global tDauer
+    global tStartTime
+    global tEinschaltDauer
     global tVerzFilter
 
     # speichere Sollwerte
     # Sollwert Interval
-    a = tsollInterval.get()
-    tInterval = a.replace(" Uhr", "").replace("hh:mm", "")
-    tsollInterval.delete(0, "end")
-    tsollInterval.insert(0, str(tInterval) + " Uhr")
+    a = tsollStartTime.get()
+    tStartTime = a.replace(" Uhr", "").replace("hh:mm", "").replace(":", ".")
+    tsollStartTime.delete(0, "end")
+    tsollStartTime.insert(0, str(tStartTime) + " Uhr")
 
     # Sollwert Dauer
-    b = tsollDauer.get()
-    tDauer = b.replace(" min", "").replace("min", "")
-    tsollDauer.delete(0, "end")
-    tsollDauer.insert(0, str(tDauer) + " min")
+    b = tsollEinschaltDauer.get()
+    tEinschaltDauer = b.replace(" min", "").replace("min", "")
+    tsollEinschaltDauer.delete(0, "end")
+    tsollEinschaltDauer.insert(0, str(tEinschaltDauer) + " min")
 
     # Sollwert Verzögerung Filter
     c = tsollVerzFilter.get()
