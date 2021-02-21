@@ -7,7 +7,7 @@ but can be run on any System where Python is installed. The Poolsteering can con
 - a pH-Sensor from Atlas Scientific (USB)
 
 To ensure the function of the steering, the hardware has to be rebuilt according to the Wiring Diagram and Dispo. We used the pH-Sample from [Atlas Scientific.](https://atlas-scientific.com/carrier-boards/electrically-isolated-usb-ezo-carrier-board/)
-For more Information and Details to the Hardware and Software see the [Dokumentation_DE.](../RapyPool/Dokumentation_DE)
+For more Information and Details to the Hardware and Software see the [Dokumentation_DE.](../master/Dokumentation_DE)
 
 # Installation on Raspberry Pi
 This is a provisional installation guide. A detailed version is still in work.
