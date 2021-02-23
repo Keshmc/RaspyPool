@@ -134,8 +134,7 @@ def Time():
     # Errorhandling Zeitsteuerung
     global tEinschaltDauer
     global tVerzFilter
-    print(tVerzFilter)
-    print(tEinschaltDauer)
+
 
     # Meldung wenn tVerzFilter grösser ist als Dauer
     if int(tVerzFilter) > int(tEinschaltDauer):
