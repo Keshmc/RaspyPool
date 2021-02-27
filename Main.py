@@ -135,12 +135,10 @@ def Time():
     global tEinschaltDauer
     global tVerzFilter
 
-
     # Meldung wenn tVerzFilter grösser ist als Dauer
     if int(tVerzFilter) > int(tEinschaltDauer):
         LabelMeldung.configure(text="Alarm: Verzögerung Filter grösser als Einschaltdauer!", bg=str(colBgAlarm))
         hmSafe.set(False)
-
 
     else:
         try:
