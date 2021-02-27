@@ -134,14 +134,11 @@ def Time():
     # Errorhandling Zeitsteuerung
     global tEinschaltDauer
     global tVerzFilter
-    print(tVerzFilter)
-    print(tEinschaltDauer)
 
     # Meldung wenn tVerzFilter grösser ist als Dauer
     if int(tVerzFilter) > int(tEinschaltDauer):
         LabelMeldung.configure(text="Alarm: Verzögerung Filter grösser als Einschaltdauer!", bg=str(colBgAlarm))
         hmSafe.set(False)
-
 
     else:
         try:
@@ -178,18 +175,21 @@ def compTime():
     global tVerzFilter
 
     # Vergleiche aktuelle Zeit
-    Hour = float(time.strftime("%H"))
-    Min = float(time.strftime("%M"))
+    try:
+        Hour = float(time.strftime("%H"))
+        Min = float(time.strftime("%M"))
 
-    # Convertiere Zeit
-    hStartTime, a = divmod(float(tStartTime), 1)
-    mStartTime = round(a * 100)
+        # Convertiere Zeit
+        hStartTime, a = divmod(float(tStartTime), 60)
+        mStartTime = round(a * 100)
 
-    hDauer, mDauer = divmod(float(tEinschaltDauer), 60)
-    hVerzFilter, mVerzFilter = divmod(float(tVerzFilter), 60)
+        hDauer, mDauer = divmod(float(tEinschaltDauer), 60)
+        hVerzFilter, mVerzFilter = divmod(float(tVerzFilter), 60)
 
-    hEnd = hStartTime + hDauer
-    mEnd = mStartTime + mDauer
+        hEnd = hStartTime + hDauer
+        mEnd = mStartTime + mDauer
+    except:
+        pass
 
     # Vergleiche aktuelle Zeit
     actual = float(time.strftime("%H%M"))
@@ -253,10 +253,10 @@ def Ablauf():
             BtnHeat.configure(bg=colBtn)
 
             # setzte alle Ausgänge zurück
-            OutFilter.off()
-            OutPumpe.off()
-            OutHeizung.off()
-            OutReserve.off()
+            OutFilter.on()
+            OutPumpe.on()
+            OutHeizung.on()
+            OutReserve.on()
         except NameError:
             pass
 
@@ -276,26 +276,26 @@ def Ablauf():
 
     # Out Pumpe
     if befOutAuto.get() or befPumpHand.get() or befOutService.get():
-        # OutPumpe.on()
+        OutPumpe.off()
         BtnPumpe.configure(bg=colBtnEin)
     else:
-        # OutPumpe.off()
+        OutPumpe.on()
         BtnPumpe.configure(bg=colBtn)
 
     # Out Heizung
     if befOutAuto.get() or befHeatHand.get() or befOutService.get():
-        # OutHeizung.on()
+        OutHeizung.off()
         BtnHeat.configure(bg=colBtnEin)
     else:
-        # OutHeizung.off()
+        OutHeizung.on()
         BtnHeat.configure(bg=colBtn)
 
     # Out Filter
     if befFilterHand.get() or befOutAutoFilter.get() and not befOutService.get():
-        # OutFilter.on()
+        OutFilter.off()
         BtnFilter.configure(bg=colBtnEin)
     else:
-        # OutFilter.off()
+        OutFilter.on()
         BtnFilter.configure(bg=colBtn)
 
     root.after(1000, Ablauf)
@@ -720,6 +720,8 @@ BtnParameters.grid(row=0, column=4, padx=10, pady=10)
 setMode()
 clock()
 phSensor()
+# stoppe Programm beim Aufstarten
+start(False)
 
 # Mainloop
 root.mainloop()
